@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useA11y } from '../../hooks/useAccessibility';
-import { Spacing, Radius } from '../../theme/spacing';
+import { Spacing } from '../../theme/spacing';
 import { getBadgeForLevel } from '../../constants/badges';
 
 interface BadgeIconProps {
@@ -11,7 +11,7 @@ interface BadgeIconProps {
 }
 
 export function BadgeIcon({ level, size = 'md', showName }: BadgeIconProps) {
-  const { colors, typography } = useA11y();
+  const { typography } = useA11y();
   const badge = getBadgeForLevel(level);
 
   const sizes = {

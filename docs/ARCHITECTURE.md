@@ -3,7 +3,7 @@
 > **Pattern:** Serverless event-driven architecture
 > **Mobile:** React Native + Expo (managed workflow)
 > **Backend:** Firebase (BaaS) + Cloud Functions (Node.js 20)
-> **Maps:** Google Maps Platform (Maps SDK, Geocoding, Directions)
+> **Maps:** OpenFreeMap.org + MapLibre GL JS (Web), react-native-maps (Native)
 
 ---
 
@@ -48,9 +48,9 @@
 │                   EXTERNAL SERVICES                                 │
 │                                                                     │
 │  ┌──────────────┐  ┌───────────────┐  ┌──────────────────────────┐ │
-│  │  Google Maps  │  │  Google Maps  │  │  Google Maps             │ │
-│  │  SDK          │  │  Geocoding    │  │  Directions API          │ │
-│  │  (Map tiles)  │  │  (Addresses)  │  │  (Route safety)          │ │
+│  │  MapLibre GL  │  │  OpenFreeMap  │  │  Geocoding               │ │
+│  │  JS (Web)     │  │  Tile Server  │  │  (Addresses)             │ │
+│  │  Map renderer │  │  (Free tiles) │  │  (Nominatim/local)       │ │
 │  └──────────────┘  └───────────────┘  └──────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────┘
 ```

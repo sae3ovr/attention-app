@@ -8,7 +8,7 @@ interface LanguageState {
 }
 
 export const useLanguageStore = create<LanguageState>()((set) => ({
-  locale: 'en',
+  locale: 'pt-BR' as Locale,
   setLocale: (locale) => set({ locale }),
 }));
 

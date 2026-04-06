@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Platform, Pressable } from 'react-native';
+import { View, StyleSheet, FlatList, Platform, Pressable, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NeonText } from '../../src/components/ui/NeonText';
+import { LogoMark } from '../../src/components/ui/LogoMark';
 import { GlassCard } from '../../src/components/ui/GlassCard';
 import { BadgeIcon } from '../../src/components/ui/BadgeIcon';
 import { useA11y, announce } from '../../src/hooks/useAccessibility';
@@ -23,10 +24,10 @@ const FEED_ICONS: Record<FeedItem['type'], { name: string; color: string }> = {
 };
 
 const FILTERS: { key: FeedFilter; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: 'format-list-bulleted' },
-  { key: 'incidents', label: 'Incidents', icon: 'alert-circle' },
-  { key: 'verified', label: 'Verified', icon: 'check-decagram' },
-  { key: 'community', label: 'Community', icon: 'account-group' },
+  { key: 'all', label: 'Todos', icon: 'format-list-bulleted' },
+  { key: 'incidents', label: 'Incidentes', icon: 'alert-circle' },
+  { key: 'verified', label: 'Verificados', icon: 'check-decagram' },
+  { key: 'community', label: 'Comunidade', icon: 'account-group' },
 ];
 
 const FILTER_MAP: Record<FeedFilter, FeedItem['type'][]> = {
@@ -37,7 +38,7 @@ const FILTER_MAP: Record<FeedFilter, FeedItem['type'][]> = {
 };
 
 function FeedCard({ item, isGuardian }: { item: FeedItem; isGuardian: boolean }) {
-  const { colors, minTarget } = useA11y();
+  const { colors } = useA11y();
   const haptics = useHaptics();
   const meta = FEED_ICONS[item.type];
   const [reacted, setReacted] = useState(false);
@@ -69,28 +70,28 @@ function FeedCard({ item, isGuardian }: { item: FeedItem; isGuardian: boolean })
               <MaterialCommunityIcons name={reacted ? 'thumb-up' : 'thumb-up-outline'} size={14}
                 color={reacted ? Colors.primary : colors.textTertiary} />
               <NeonText variant="caption" color={reacted ? Colors.primary : colors.textTertiary}>
-                Useful
+                Útil
               </NeonText>
             </Pressable>
 
             {item.type === 'new_incident' && isGuardian && (
-              <Pressable onPress={() => { haptics.medium(); announce('Incident verified by Guardian'); }}
+              <Pressable onPress={() => { haptics.medium(); announce('Incidente verificado pelo Guardião'); }}
                 style={({ pressed }) => [styles.feedActionBtn,
                   pressed && { backgroundColor: Colors.primary + '20', transform: [{ scale: 0.93 }] },
                 ]}
-                accessible accessibilityLabel="Verify as Guardian" accessibilityRole="button">
+                accessible accessibilityLabel="Verificar como Guardião" accessibilityRole="button">
                 <MaterialCommunityIcons name="shield-check" size={14} color={Colors.primary} />
-                <NeonText variant="caption" color={Colors.primary}>Verify</NeonText>
+                <NeonText variant="caption" color={Colors.primary}>Verificar</NeonText>
               </Pressable>
             )}
 
-            <Pressable onPress={() => { haptics.light(); announce('Shared!'); }}
+            <Pressable onPress={() => { haptics.light(); announce('Compartilhado!'); }}
               style={({ pressed }) => [styles.feedActionBtn,
                 pressed && { backgroundColor: 'rgba(255,255,255,0.08)', transform: [{ scale: 0.93 }] },
               ]}
-              accessible accessibilityLabel="Share this update" accessibilityRole="button">
+              accessible accessibilityLabel="Compartilhar esta atualização" accessibilityRole="button">
               <MaterialCommunityIcons name="share-outline" size={14} color={colors.textTertiary} />
-              <NeonText variant="caption" color={colors.textTertiary}>Share</NeonText>
+              <NeonText variant="caption" color={colors.textTertiary}>Compartilhar</NeonText>
             </Pressable>
           </View>
         </View>
@@ -100,7 +101,7 @@ function FeedCard({ item, isGuardian }: { item: FeedItem; isGuardian: boolean })
 }
 
 export default function FeedScreen() {
-  const { colors, minTarget } = useA11y();
+  const { colors } = useA11y();
   const haptics = useHaptics();
   const { isDesktop } = useResponsive();
   const user = useAuthStore((s) => s.user);
@@ -113,24 +114,27 @@ export default function FeedScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }, isDesktop && { alignItems: 'center' }]}>
       <View style={[styles.header, maxWidth ? { maxWidth, width: '100%' } : undefined]}>
         <View style={styles.headerRow}>
-          <View>
-            <NeonText variant="h2" glow={colors.primaryGlow}>Activity</NeonText>
-            <NeonText variant="bodySm" color={colors.textSecondary}>
-              What's happening in your community
-            </NeonText>
+          <View style={styles.headerTitleBlock}>
+            <LogoMark size={28} color={Colors.primary} />
+            <View style={styles.headerTitleText}>
+              <NeonText variant="h2" glow={colors.primaryGlow}>Atividade</NeonText>
+              <NeonText variant="bodySm" color={colors.textSecondary}>
+                O que está acontecendo na sua comunidade
+              </NeonText>
+            </View>
           </View>
           {user?.isGuardian && (
             <View style={[styles.guardianTag, { backgroundColor: Colors.primary + '15', borderColor: Colors.primary + '30' }]}>
               <NeonText style={{ fontSize: 12 }}>🛡️</NeonText>
               <NeonText variant="caption" color={Colors.primary} style={{ fontWeight: '700' }}>
-                Guardian
+                Guardião
               </NeonText>
             </View>
           )}
         </View>
 
         {/* Filter bar */}
-        <View style={styles.filterRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={styles.filterRowContent}>
           {FILTERS.map((f) => (
             <Pressable key={f.key}
               onPress={() => { haptics.selection(); setFilter(f.key); }}
@@ -147,7 +151,7 @@ export default function FeedScreen() {
               </NeonText>
             </Pressable>
           ))}
-        </View>
+        </ScrollView>
       </View>
 
       <FlatList
@@ -160,7 +164,7 @@ export default function FeedScreen() {
           <View style={styles.empty}>
             <MaterialCommunityIcons name="newspaper-variant-outline" size={48} color={colors.textTertiary} />
             <NeonText variant="body" color={colors.textTertiary} style={styles.emptyText}>
-              No activity matching this filter
+              Nenhuma atividade para este filtro
             </NeonText>
           </View>
         }
@@ -179,23 +183,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'flex-start', marginBottom: Spacing.md,
   },
+  headerTitleBlock: {
+    flexDirection: 'row', alignItems: 'flex-start', flex: 1, gap: Spacing.sm,
+  },
+  headerTitleText: { flex: 1 },
   guardianTag: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: Spacing.sm, paddingVertical: 4,
     borderRadius: Radius.full, borderWidth: 1,
   },
   filterRow: {
-    flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm,
+    marginBottom: Spacing.sm, flexGrow: 0,
+  },
+  filterRowContent: {
+    flexDirection: 'row', gap: Spacing.sm, paddingRight: Spacing.md,
   },
   filterChip: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: Spacing.md, paddingVertical: 6,
     borderRadius: Radius.full, borderWidth: 1,
+    ...(Platform.OS === 'web' ? { transition: 'all 0.25s ease', cursor: 'pointer' } as any : {}),
   },
   list: {
     paddingHorizontal: Spacing.xl, paddingBottom: Spacing['5xl'], gap: Spacing.md,
   },
-  feedCard: { padding: Spacing.lg },
+  feedCard: { padding: Spacing.xl },
   feedRow: { flexDirection: 'row', alignItems: 'flex-start' },
   feedIconBg: {
     width: 42, height: 42, borderRadius: 12,
@@ -213,6 +225,7 @@ const styles = StyleSheet.create({
   feedActionBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingVertical: 4, paddingHorizontal: Spacing.sm, borderRadius: Radius.sm,
+    ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease', cursor: 'pointer' } as any : {}),
   },
   empty: { alignItems: 'center', paddingTop: 80 },
   emptyText: { marginTop: Spacing.md },

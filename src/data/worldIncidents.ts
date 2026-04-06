@@ -25,16 +25,16 @@ const SEEDS: WorldIncidentSeed[] = [
   { city: 'Lagos', country: 'NG', category: 'fire', severity: 'critical', title: 'Market fire in Balogun', description: 'Major fire at Balogun Market. Multiple stalls destroyed. Emergency services stretched thin.', lat: 6.4480, lng: 3.3930, address: 'Balogun Market, Lagos Island', reporterName: 'Adebayo K.', reporterLevel: 6, confirmCount: 42, isVerified: true },
 
   // ─── FLOODS ───
-  { city: 'Mumbai', country: 'IN', category: 'hazard', severity: 'critical', title: 'Severe flooding in Dharavi', description: 'Monsoon flooding has submerged streets. Water level over 1 meter. Residents trapped on upper floors.', lat: 19.0435, lng: 72.8535, address: 'Dharavi, Mumbai', reporterName: 'Priya D.', reporterLevel: 11, confirmCount: 67, isVerified: true },
-  { city: 'Bangkok', country: 'TH', category: 'hazard', severity: 'high', title: 'Flash flooding near Chatuchak', description: 'Sudden rain caused flash flooding. Roads impassable. BTS still operating but ground transport halted.', lat: 13.7999, lng: 100.5533, address: 'Chatuchak, Bangkok', reporterName: 'Somchai P.', reporterLevel: 8, confirmCount: 29, isVerified: true },
-  { city: 'Paris', country: 'FR', category: 'hazard', severity: 'high', title: 'Seine river flood alert', description: 'Water level rising dangerously. Quays closed to public. Precautionary evacuation in low areas.', lat: 48.8520, lng: 2.3476, address: 'Quai de la Seine, Paris', reporterName: 'Pierre L.', reporterLevel: 15, confirmCount: 34, isVerified: true },
-  { city: 'Buenos Aires', country: 'AR', category: 'hazard', severity: 'medium', title: 'Localized flooding in La Boca', description: 'Heavy rain caused sewer overflow. Several streets flooded with 30cm of water. Avoid driving.', lat: -34.6348, lng: -58.3630, address: 'La Boca, Buenos Aires', reporterName: 'Martín G.', reporterLevel: 5, confirmCount: 15, isVerified: false },
+  { city: 'Mumbai', country: 'IN', category: 'flood', severity: 'critical', title: 'Severe flooding in Dharavi', description: 'Monsoon flooding has submerged streets. Water level over 1 meter. Residents trapped on upper floors.', lat: 19.0435, lng: 72.8535, address: 'Dharavi, Mumbai', reporterName: 'Priya D.', reporterLevel: 11, confirmCount: 67, isVerified: true },
+  { city: 'Bangkok', country: 'TH', category: 'flood', severity: 'high', title: 'Flash flooding near Chatuchak', description: 'Sudden rain caused flash flooding. Roads impassable. BTS still operating but ground transport halted.', lat: 13.7999, lng: 100.5533, address: 'Chatuchak, Bangkok', reporterName: 'Somchai P.', reporterLevel: 8, confirmCount: 29, isVerified: true },
+  { city: 'Paris', country: 'FR', category: 'flood', severity: 'high', title: 'Seine river flood alert', description: 'Water level rising dangerously. Quays closed to public. Precautionary evacuation in low areas.', lat: 48.8520, lng: 2.3476, address: 'Quai de la Seine, Paris', reporterName: 'Pierre L.', reporterLevel: 15, confirmCount: 34, isVerified: true },
+  { city: 'Buenos Aires', country: 'AR', category: 'flood', severity: 'medium', title: 'Localized flooding in La Boca', description: 'Heavy rain caused sewer overflow. Several streets flooded with 30cm of water. Avoid driving.', lat: -34.6348, lng: -58.3630, address: 'La Boca, Buenos Aires', reporterName: 'Martín G.', reporterLevel: 5, confirmCount: 15, isVerified: false },
 
   // ─── INJURED ANIMALS ───
-  { city: 'Rome', country: 'IT', category: 'other', severity: 'low', title: 'Injured stray dog near Colosseum', description: 'Large dog limping badly with injured front leg. Appears friendly but in pain. Needs veterinary help.', lat: 41.8905, lng: 12.4944, address: 'Via dei Fori Imperiali, Rome', reporterName: 'Giulia R.', reporterLevel: 4, confirmCount: 8, isVerified: false },
-  { city: 'Istanbul', country: 'TR', category: 'other', severity: 'low', title: 'Cat colony needs medical attention', description: '~15 street cats showing signs of illness near the Spice Bazaar. Possible calicivirus outbreak.', lat: 41.0167, lng: 28.9700, address: 'Eminönü, Istanbul', reporterName: 'Ayşe B.', reporterLevel: 6, confirmCount: 12, isVerified: false },
-  { city: 'Rio de Janeiro', country: 'BR', category: 'other', severity: 'medium', title: 'Injured sea turtle on Copacabana', description: 'Green sea turtle washed ashore with fishing net entangled. IBAMA notified. Volunteers keeping area clear.', lat: -22.9711, lng: -43.1826, address: 'Praia de Copacabana, Rio', reporterName: 'Camila F.', reporterLevel: 10, confirmCount: 25, isVerified: true },
-  { city: 'Berlin', country: 'DE', category: 'other', severity: 'low', title: 'Injured fox in Tiergarten', description: 'Red fox with apparent leg injury spotted near the Victory Column. Animal rescue contacted.', lat: 52.5145, lng: 13.3502, address: 'Tiergarten, Berlin', reporterName: 'Hans M.', reporterLevel: 3, confirmCount: 5, isVerified: false },
+  { city: 'Rome', country: 'IT', category: 'injured_animal', severity: 'low', title: 'Injured stray dog near Colosseum', description: 'Large dog limping badly with injured front leg. Appears friendly but in pain. Needs veterinary help.', lat: 41.8905, lng: 12.4944, address: 'Via dei Fori Imperiali, Rome', reporterName: 'Giulia R.', reporterLevel: 4, confirmCount: 8, isVerified: false },
+  { city: 'Istanbul', country: 'TR', category: 'injured_animal', severity: 'low', title: 'Cat colony needs medical attention', description: '~15 street cats showing signs of illness near the Spice Bazaar. Possible calicivirus outbreak.', lat: 41.0167, lng: 28.9700, address: 'Eminönü, Istanbul', reporterName: 'Ayşe B.', reporterLevel: 6, confirmCount: 12, isVerified: false },
+  { city: 'Rio de Janeiro', country: 'BR', category: 'injured_animal', severity: 'medium', title: 'Injured sea turtle on Copacabana', description: 'Green sea turtle washed ashore with fishing net entangled. IBAMA notified. Volunteers keeping area clear.', lat: -22.9711, lng: -43.1826, address: 'Praia de Copacabana, Rio', reporterName: 'Camila F.', reporterLevel: 10, confirmCount: 25, isVerified: true },
+  { city: 'Berlin', country: 'DE', category: 'injured_animal', severity: 'low', title: 'Injured fox in Tiergarten', description: 'Red fox with apparent leg injury spotted near the Victory Column. Animal rescue contacted.', lat: 52.5145, lng: 13.3502, address: 'Tiergarten, Berlin', reporterName: 'Hans M.', reporterLevel: 3, confirmCount: 5, isVerified: false },
 
   // ─── TRAFFIC ACCIDENTS ───
   { city: 'Mexico City', country: 'MX', category: 'accident', severity: 'high', title: 'Multi-vehicle crash on Periférico', description: '5-car pileup on the inner ring. 3 people injured. Two lanes completely blocked. Expect 1hr+ delays.', lat: 19.3730, lng: -99.1770, address: 'Periférico Sur, CDMX', reporterName: 'Carlos V.', reporterLevel: 12, confirmCount: 31, isVerified: true },
@@ -44,9 +44,9 @@ const SEEDS: WorldIncidentSeed[] = [
   { city: 'Nairobi', country: 'KE', category: 'accident', severity: 'high', title: 'Matatu crash on Thika Road', description: 'Public minibus crash involving matatu and private vehicle. Several passengers with injuries.', lat: -1.2205, lng: 36.8880, address: 'Thika Road, Nairobi', reporterName: 'Wanjiku M.', reporterLevel: 8, confirmCount: 20, isVerified: true },
 
   // ─── BUILDINGS AT RISK ───
-  { city: 'Cairo', country: 'EG', category: 'hazard', severity: 'critical', title: 'Building at risk of collapse', description: 'Residential building showing severe cracks in foundation. Residents evacuated. Structural engineers assessing.', lat: 30.0560, lng: 31.2460, address: 'Shubra, Cairo', reporterName: 'Mahmoud A.', reporterLevel: 9, confirmCount: 35, isVerified: true },
-  { city: 'Shanghai', country: 'CN', category: 'hazard', severity: 'high', title: 'Construction scaffolding collapse risk', description: 'Strong winds damaging scaffolding on 30-story building. Area cordoned off. Debris falling occasionally.', lat: 31.2350, lng: 121.4790, address: 'Pudong, Shanghai', reporterName: 'Wei L.', reporterLevel: 13, confirmCount: 27, isVerified: true },
-  { city: 'Casablanca', country: 'MA', category: 'hazard', severity: 'high', title: 'Old riad structure collapsing', description: 'Historic building in medina partially collapsed. Rubble on street. Authorities blocking access.', lat: 33.5730, lng: -7.5890, address: 'Ancienne Médina, Casablanca', reporterName: 'Fatima Z.', reporterLevel: 7, confirmCount: 18, isVerified: false },
+  { city: 'Cairo', country: 'EG', category: 'building_risk', severity: 'critical', title: 'Building at risk of collapse', description: 'Residential building showing severe cracks in foundation. Residents evacuated. Structural engineers assessing.', lat: 30.0560, lng: 31.2460, address: 'Shubra, Cairo', reporterName: 'Mahmoud A.', reporterLevel: 9, confirmCount: 35, isVerified: true },
+  { city: 'Shanghai', country: 'CN', category: 'building_risk', severity: 'high', title: 'Construction scaffolding collapse risk', description: 'Strong winds damaging scaffolding on 30-story building. Area cordoned off. Debris falling occasionally.', lat: 31.2350, lng: 121.4790, address: 'Pudong, Shanghai', reporterName: 'Wei L.', reporterLevel: 13, confirmCount: 27, isVerified: true },
+  { city: 'Casablanca', country: 'MA', category: 'building_risk', severity: 'high', title: 'Old riad structure collapsing', description: 'Historic building in medina partially collapsed. Rubble on street. Authorities blocking access.', lat: 33.5730, lng: -7.5890, address: 'Ancienne Médina, Casablanca', reporterName: 'Fatima Z.', reporterLevel: 7, confirmCount: 18, isVerified: false },
 
   // ─── SUSPICIOUS PERSONS ───
   { city: 'New York', country: 'US', category: 'suspicious', severity: 'medium', title: 'Suspicious package at Penn Station', description: 'Unattended bag under bench near track 7. NYPD bomb squad notified. Area being cleared.', lat: 40.7505, lng: -73.9935, address: 'Penn Station, Manhattan', reporterName: 'Mike D.', reporterLevel: 10, confirmCount: 22, isVerified: true },
@@ -97,14 +97,12 @@ export function generateWorldIncidents(): Incident[] {
     credibilityScore: seed.confirmCount * 1.5,
     status: 'active' as const,
     isVerified: seed.isVerified,
+    isFakeReport: false,
     verifiedByUid: seed.isVerified ? 'guardian-world' : null,
     verifiedByName: seed.isVerified ? 'World Guardian' : null,
-    reactions: {
-      useful: Math.floor(seed.confirmCount * 2.2),
-      beCareful: Math.floor(seed.confirmCount * 0.8),
-      watching: Math.floor(seed.confirmCount * 3),
-    },
+    views: Math.floor(seed.confirmCount * 4.5),
     commentCount: Math.floor(seed.confirmCount * 0.5),
+    comments: [],
     createdAt: now - (i * 1200000 + Math.random() * 3600000),
     expiresAt: now + 86400000,
   }));

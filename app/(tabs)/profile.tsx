@@ -10,10 +10,11 @@ import { useA11y, announce } from '../../src/hooks/useAccessibility';
 import { useHaptics } from '../../src/hooks/useHaptics';
 import { useResponsive } from '../../src/hooks/useResponsive';
 import { useAuthStore } from '../../src/stores/authStore';
-import { getBadgeForReputation, getProgressToNextLevel, BADGES } from '../../src/constants/badges';
+import { getBadgeForReputation, getProgressToNextLevel } from '../../src/constants/badges';
+import { LogoMark } from '../../src/components/ui/LogoMark';
 import { Colors } from '../../src/theme/colors';
 import { Spacing, Radius } from '../../src/theme/spacing';
-import { useLanguageStore, AVAILABLE_LANGUAGES, t } from '../../src/i18n';
+import { useLanguageStore, AVAILABLE_LANGUAGES } from '../../src/i18n';
 import { useAccessibilityStore } from '../../src/stores/accessibilityStore';
 
 function StatCard({ icon, label, value, color }: { icon: string; label: string; value: string | number; color: string }) {
@@ -57,12 +58,12 @@ function MenuRow({ icon, label, hint, onPress, color, danger, badge }: {
 }
 
 const EMERGENCY_SERVICES = [
-  { id: 'police', label: 'Police', icon: 'police-badge', color: '#3B7AFF', phone: '190' },
-  { id: 'fire', label: 'Firefighters', icon: 'fire-truck', color: '#FF5522', phone: '193' },
-  { id: 'ambulance', label: 'Ambulance', icon: 'ambulance', color: '#FF3B7A', phone: '192' },
-  { id: 'social', label: 'Social Service', icon: 'hand-heart', color: '#7B61FF', phone: '100' },
-  { id: 'animals', label: 'Animal Care', icon: 'paw', color: '#FFB800', phone: '0800-111-000' },
-  { id: 'civil', label: 'Civil Defense', icon: 'shield-alert', color: '#00D4FF', phone: '199' },
+  { id: 'police', label: 'Polícia', icon: 'police-badge', color: '#3B7AFF', phone: '190' },
+  { id: 'fire', label: 'Bombeiros', icon: 'fire-truck', color: '#FF5522', phone: '193' },
+  { id: 'ambulance', label: 'Ambulância', icon: 'ambulance', color: '#FF3B7A', phone: '192' },
+  { id: 'social', label: 'Serviço Social', icon: 'hand-heart', color: '#7B61FF', phone: '100' },
+  { id: 'animals', label: 'Proteção Animal', icon: 'paw', color: '#FFB800', phone: '0800-111-000' },
+  { id: 'civil', label: 'Defesa Civil', icon: 'shield-alert', color: '#00D4FF', phone: '199' },
 ];
 
 function EmergencyButton({ service }: { service: typeof EMERGENCY_SERVICES[number] }) {
@@ -108,7 +109,7 @@ function EmergencyButton({ service }: { service: typeof EMERGENCY_SERVICES[numbe
           },
         ]}
         accessible
-        accessibilityLabel={`Call ${service.label} at ${service.phone}`}
+        accessibilityLabel={`Ligar ${service.label} no ${service.phone}`}
         accessibilityRole="button"
       >
         <View style={[styles.emergencyIconBg, { backgroundColor: service.color + '20' }]}>
@@ -140,9 +141,9 @@ export default function ProfileScreen() {
       <View style={[styles.container, styles.center, { backgroundColor: colors.background }]}>
         <MaterialCommunityIcons name="shield-account" size={64} color={colors.textTertiary} />
         <NeonText variant="h4" color={colors.textSecondary} style={{ marginTop: Spacing.lg }}>
-          Sign in to continue
+          Entre para continuar
         </NeonText>
-        <NeonButton title="Sign In" onPress={() => router.replace('/(auth)/sign-in')} style={{ marginTop: Spacing.xl }} />
+        <NeonButton title="Entrar" onPress={() => router.replace('/(auth)/sign-in')} style={{ marginTop: Spacing.xl }} />
       </View>
     );
   }
@@ -157,6 +158,9 @@ export default function ProfileScreen() {
 
       {/* Profile Header */}
       <View style={[styles.header, maxWidth ? { maxWidth, width: '100%' } : undefined]}>
+        <View style={{ alignItems: 'center', marginBottom: 8 }}>
+          <LogoMark size={36} color={Colors.primary} />
+        </View>
         <View style={styles.profileHeader}>
           <View style={[styles.avatarLg, { borderColor: badge.color, shadowColor: badge.glowColor }]}>
             <NeonText variant="h1" style={{ fontSize: 32 }}>{user.displayName.charAt(0).toUpperCase()}</NeonText>
@@ -176,7 +180,7 @@ export default function ProfileScreen() {
         <GlassCard
           style={[styles.guardianBanner, maxWidth ? { maxWidth, width: '100%' } : undefined]}
           glowColor={Colors.primary + '30'}
-          accessibilityLabel="Guardian tier. You have full moderation powers."
+          accessibilityLabel="Nível Guardião. Você tem poderes completos de moderação."
         >
           <View style={styles.guardianBannerRow}>
             <View style={styles.guardianBadge}>
@@ -187,7 +191,7 @@ export default function ProfileScreen() {
                 GUARDIAN
               </NeonText>
               <NeonText variant="caption" color={colors.textSecondary}>
-                Full moderation powers unlocked
+                Poderes completos de moderação desbloqueados
               </NeonText>
             </View>
             <View style={styles.guardianLevel}>
@@ -200,9 +204,9 @@ export default function ProfileScreen() {
 
           <View style={styles.guardianPowers}>
             {[
-              { icon: 'check-decagram', label: 'Verify Incidents', count: user.verifiedIncidents },
-              { icon: 'delete-circle', label: 'Remove False Reports', count: user.removedIncidents },
-              { icon: 'account-supervisor', label: 'Mentoring Users', count: user.mentees },
+              { icon: 'check-decagram', label: 'Verificar Incidentes', count: user.verifiedIncidents },
+              { icon: 'delete-circle', label: 'Remover Falsos', count: user.removedIncidents },
+              { icon: 'account-supervisor', label: 'Mentorados', count: user.mentees },
             ].map((power) => (
               <View key={power.label} style={styles.powerItem}>
                 <MaterialCommunityIcons name={power.icon as any} size={16} color={Colors.primary} />
@@ -223,7 +227,7 @@ export default function ProfileScreen() {
         accessibilityLabel={`Reputation: ${user.reputation.toLocaleString()} points. ${badge.nameEN}.`}
       >
         <View style={styles.repRow}>
-          <NeonText variant="label" color={colors.textSecondary}>Reputation</NeonText>
+          <NeonText variant="label" color={colors.textSecondary}>Reputação</NeonText>
           <NeonText variant="h3" color={badge.color} glow={badge.glowColor}>
             {user.reputation.toLocaleString()}
           </NeonText>
@@ -249,18 +253,18 @@ export default function ProfileScreen() {
 
       {/* Stats grid */}
       <View style={[styles.statsGrid, maxWidth ? { maxWidth, width: '100%' } : undefined]}>
-        <StatCard icon="file-document-edit" label="Reports" value={user.totalReports.toLocaleString()} color={Colors.primary} />
-        <StatCard icon="check-circle" label="Confirms" value={user.totalConfirmations.toLocaleString()} color={Colors.success} />
-        <StatCard icon="calendar-today" label="Today"
+        <StatCard icon="file-document-edit" label="Relatórios" value={user.totalReports.toLocaleString()} color={Colors.primary} />
+        <StatCard icon="check-circle" label="Confirmações" value={user.totalConfirmations.toLocaleString()} color={Colors.success} />
+        <StatCard icon="calendar-today" label="Hoje"
           value={user.dailyReportLimit === -1 ? `${user.reportsToday}/∞` : `${user.reportsToday}/${user.dailyReportLimit}`}
           color={Colors.warning} />
       </View>
 
       {user.isGuardian && (
         <View style={[styles.statsGrid, maxWidth ? { maxWidth, width: '100%' } : undefined]}>
-          <StatCard icon="check-decagram" label="Verified" value={user.verifiedIncidents ?? 0} color={Colors.primary} />
-          <StatCard icon="delete-circle" label="Removed" value={user.removedIncidents ?? 0} color={Colors.error} />
-          <StatCard icon="account-supervisor" label="Mentees" value={user.mentees ?? 0} color={Colors.secondary} />
+          <StatCard icon="check-decagram" label="Verificados" value={user.verifiedIncidents ?? 0} color={Colors.primary} />
+          <StatCard icon="delete-circle" label="Removidos" value={user.removedIncidents ?? 0} color={Colors.error} />
+          <StatCard icon="account-supervisor" label="Mentorados" value={user.mentees ?? 0} color={Colors.secondary} />
         </View>
       )}
 
@@ -269,7 +273,7 @@ export default function ProfileScreen() {
         <View style={styles.emergencySectionHeader}>
           <MaterialCommunityIcons name="phone-alert" size={18} color={Colors.error} />
           <NeonText variant="label" color={Colors.error} style={{ marginLeft: Spacing.sm }}>
-            Emergency Services
+            Serviços de Emergência
           </NeonText>
         </View>
         <View style={styles.emergencyGrid}>
@@ -286,7 +290,7 @@ export default function ProfileScreen() {
           <View style={styles.settingLabelRow}>
             <MaterialCommunityIcons name="theme-light-dark" size={18} color={colors.textSecondary} />
             <NeonText variant="bodySm" color={colors.textPrimary} style={{ marginLeft: Spacing.sm }}>
-              Theme
+              Tema
             </NeonText>
           </View>
           <View style={styles.themeToggle}>
@@ -299,7 +303,7 @@ export default function ProfileScreen() {
               }]}
             >
               <MaterialCommunityIcons name="weather-night" size={16} color={!isLightTheme ? colors.primary : colors.textTertiary} />
-              <NeonText variant="caption" color={!isLightTheme ? colors.primary : colors.textTertiary}> Dark</NeonText>
+              <NeonText variant="caption" color={!isLightTheme ? colors.primary : colors.textTertiary}> Escuro</NeonText>
             </Pressable>
             <Pressable
               onPress={() => { haptics.light(); setA11y('lightTheme', true); }}
@@ -310,7 +314,7 @@ export default function ProfileScreen() {
               }]}
             >
               <MaterialCommunityIcons name="white-balance-sunny" size={16} color={isLightTheme ? colors.primary : colors.textTertiary} />
-              <NeonText variant="caption" color={isLightTheme ? colors.primary : colors.textTertiary}> Light</NeonText>
+              <NeonText variant="caption" color={isLightTheme ? colors.primary : colors.textTertiary}> Claro</NeonText>
             </Pressable>
           </View>
         </View>
@@ -320,7 +324,7 @@ export default function ProfileScreen() {
           <View style={styles.settingLabelRow}>
             <MaterialCommunityIcons name="translate" size={18} color={colors.textSecondary} />
             <NeonText variant="bodySm" color={colors.textPrimary} style={{ marginLeft: Spacing.sm }}>
-              Language
+              Idioma
             </NeonText>
           </View>
           <View style={styles.langRow}>
@@ -348,19 +352,19 @@ export default function ProfileScreen() {
 
       {/* QR Codes - Download on Mobile */}
       <GlassCard style={[styles.qrSection, maxWidth ? { maxWidth, width: '100%' } : undefined]}
-        accessibilityLabel="Scan QR codes to download Attention on iOS or Android">
+        accessibilityLabel="Escaneie QR codes para baixar Alert.io no iOS ou Android">
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.md }}>
           <MaterialCommunityIcons name="qrcode-scan" size={16} color={colors.primary} />
-          <NeonText variant="label" color={colors.primary}>Get the App</NeonText>
+          <NeonText variant="label" color={colors.primary}>Baixe o App</NeonText>
         </View>
         <View style={styles.qrDualRow}>
           {/* iOS QR */}
           <View style={styles.qrCard}>
             <View style={[styles.qrBg, { backgroundColor: '#fff' }]}>
               <Image
-                source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://apps.apple.com/app/attention-community-safety/id0000000000&bgcolor=ffffff&color=0d1117' }}
+                source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://apps.apple.com/app/alert-io/id0000000000&bgcolor=ffffff&color=0d1117' }}
                 style={{ width: 90, height: 90 }}
-                accessibilityLabel="QR code to download Attention on iOS App Store"
+                accessibilityLabel="QR code para baixar Alert.io na App Store"
               />
             </View>
             <View style={[styles.storeBadgeLg, { borderColor: colors.border, backgroundColor: colors.glass.background }]}>
@@ -376,9 +380,9 @@ export default function ProfileScreen() {
           <View style={styles.qrCard}>
             <View style={[styles.qrBg, { backgroundColor: '#fff' }]}>
               <Image
-                source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://play.google.com/store/apps/details?id=com.attention.community&bgcolor=ffffff&color=0d1117' }}
+                source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://play.google.com/store/apps/details?id=io.alert.community&bgcolor=ffffff&color=0d1117' }}
                 style={{ width: 90, height: 90 }}
-                accessibilityLabel="QR code to download Attention on Google Play"
+                accessibilityLabel="QR code para baixar Alert.io no Google Play"
               />
             </View>
             <View style={[styles.storeBadgeLg, { borderColor: colors.border, backgroundColor: colors.glass.background }]}>
@@ -394,35 +398,26 @@ export default function ProfileScreen() {
 
       {/* Menu items */}
       <GlassCard noPadding style={[styles.menuCard, maxWidth ? { maxWidth, width: '100%' } : undefined]}>
-        {user.isGuardian && (
-          <>
-            <MenuRow icon="view-dashboard" label="Moderation Dashboard"
-              hint="Open the Guardian moderation dashboard" color={Colors.primary}
-              onPress={() => { haptics.medium(); announce('Moderation dashboard coming soon'); }}
-              badge="GUARDIAN" />
-            <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          </>
-        )}
-        <MenuRow icon="cog" label="Settings" hint="Open app settings" onPress={() => router.push('/settings')} />
+        <MenuRow icon="cog" label="Configurações" hint="Abrir configurações" onPress={() => router.push('/settings')} />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <MenuRow icon="human-accessible" label="Accessibility"
-          hint="Configure accessibility options" color={Colors.secondary}
+        <MenuRow icon="human-accessible" label="Acessibilidade"
+          hint="Configurar opções de acessibilidade" color={Colors.secondary}
           onPress={() => router.push('/settings/accessibility')} />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <MenuRow icon="eye-off" label={user.isGhostMode ? 'Ghost Mode (ON)' : 'Ghost Mode'}
-          hint="Toggle visibility on public map"
+        <MenuRow icon="eye-off" label={user.isGhostMode ? 'Modo Fantasma (ON)' : 'Modo Fantasma'}
+          hint="Alternar visibilidade no mapa público"
           badge={user.isGhostMode ? 'ON' : undefined}
           onPress={() => {
             haptics.medium();
             useAuthStore.getState().updateProfile({ isGhostMode: !user.isGhostMode });
-            announce(user.isGhostMode ? 'Ghost mode disabled.' : 'Ghost mode enabled.');
+            announce(user.isGhostMode ? 'Modo fantasma desativado.' : 'Modo fantasma ativado.');
           }} />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <MenuRow icon="share-variant" label="Share Location"
-          hint="Create a temporary location sharing link"
-          onPress={() => { haptics.light(); announce('Location sharing link created'); }} />
+        <MenuRow icon="share-variant" label="Compartilhar Localização"
+          hint="Criar link temporário de compartilhamento"
+          onPress={() => { haptics.light(); announce('Link de localização criado'); }} />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <MenuRow icon="logout" label="Sign Out" hint="Sign out of your account" danger
+        <MenuRow icon="logout" label="Sair" hint="Sair da sua conta" danger
           onPress={() => { signOut(); router.replace('/(auth)/sign-in'); }} />
       </GlassCard>
     </ScrollView>
@@ -442,7 +437,7 @@ const styles = StyleSheet.create({
     width: 88, height: 88, borderRadius: 44, borderWidth: 3,
     justifyContent: 'center', alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.05)',
-    shadowOpacity: 0.6, shadowRadius: 16, elevation: 8, marginBottom: Spacing.md,
+    shadowOpacity: 0.6, shadowRadius: 22, elevation: 8, marginBottom: Spacing.md,
     position: 'relative',
   },
   guardianCrown: {
@@ -481,7 +476,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', paddingHorizontal: Spacing.xl,
     gap: Spacing.md, marginBottom: Spacing.lg,
   },
-  statCard: { flex: 1, alignItems: 'center', padding: Spacing.md },
+  statCard: { flex: 1, alignItems: 'center', padding: Spacing.lg },
   statValue: { marginTop: Spacing.xs, marginBottom: 2 },
 
   emergencySection: {
@@ -509,6 +504,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     borderRadius: Radius.lg,
     borderWidth: 1,
+    ...(Platform.OS === 'web' ? { transition: 'all 0.25s cubic-bezier(0.25,0.8,0.25,1)', cursor: 'pointer' } as any : {}),
   },
   emergencyIconBg: {
     width: 40,
@@ -549,6 +545,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: Radius.full,
     borderWidth: 1,
+    ...(Platform.OS === 'web' ? { transition: 'all 0.25s ease', cursor: 'pointer' } as any : {}),
   },
   langRow: {
     flexDirection: 'row',
@@ -561,6 +558,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minWidth: 36,
     alignItems: 'center',
+    ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease', cursor: 'pointer' } as any : {}),
   },
   qrSection: {
     marginHorizontal: Spacing.xl,
@@ -589,32 +587,11 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     borderWidth: 1,
   },
-  qrRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  qrCodeWrapper: {
-    marginRight: Spacing.lg,
-  },
-  qrText: {
-    flex: 1,
-  },
-  storeIcons: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  storeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: Radius.full,
-    borderWidth: 1,
-  },
   menuCard: { marginHorizontal: Spacing.xl },
   menuRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+    ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease', cursor: 'pointer' } as any : {}),
   },
   menuLabel: { flex: 1, marginLeft: Spacing.md },
   menuBadge: {

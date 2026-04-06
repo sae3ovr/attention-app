@@ -1,47 +1,46 @@
 {
   "expo": {
-    "name": "Attention",
-    "slug": "attention-app",
-    "version": "1.0.0",
+    "name": "Alert.io",
+    "slug": "alert-io-app",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "attention",
+    "scheme": "alertio",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
-    "platforms": ["android", "web"],
+    "newArchEnabled": false,
+    "platforms": ["ios", "android", "web"],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#0A0A0F"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "io.alert.community",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Alert.io usa a sua localização para mostrar incidentes próximos.",
+        "NSLocationAlwaysUsageDescription": "Alert.io usa a sua localização para alertas de segurança em tempo real.",
+        "NSCameraUsageDescription": "Alert.io usa a câmera para reportar incidentes."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0A0A0F"
       },
-      "package": "com.attention.app",
-      "versionCode": 1,
+      "package": "io.alert.community",
+      "versionCode": 2,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION",
         "VIBRATE",
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "RECEIVE_BOOT_COMPLETED",
-        "FOREGROUND_SERVICE"
+        "CAMERA"
       ],
-      "config": {
-        "googleMaps": {
-          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
-        }
-      },
       "intentFilters": [
         {
           "action": "VIEW",
           "autoVerify": true,
-          "data": [{ "scheme": "attention" }],
+          "data": [{ "scheme": "alertio" }],
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
@@ -50,17 +49,17 @@
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/favicon.png",
-      "name": "Attention — Community Safety",
+      "name": "Alert.io — Community Safety",
       "description": "Community safety platform with real-time incident reporting and monitoring",
       "backgroundColor": "#0A0A0F",
-      "themeColor": "#00FFAA"
+      "themeColor": "#00FF88"
     },
     "plugins": [
       "expo-router",
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Attention uses your location to show nearby incidents and keep you safe.",
+          "locationAlwaysAndWhenInUsePermission": "Alert.io uses your location to show nearby incidents and keep you safe.",
           "isAndroidBackgroundLocationEnabled": true
         }
       ]

@@ -15,10 +15,20 @@ export type IncidentCategory =
 
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type IncidentStatus = 'active' | 'resolved' | 'expired' | 'removed';
+export type IncidentSource = 'community' | 'uk_police' | 'dc_gov' | 'road511' | 'dados_gov';
 
 export interface GeoPosition {
   latitude: number;
   longitude: number;
+}
+
+export interface IncidentComment {
+  id: string;
+  uid: string;
+  userName: string;
+  userLevel: number;
+  text: string;
+  createdAt: number;
 }
 
 export interface Incident {
@@ -40,16 +50,38 @@ export interface Incident {
   credibilityScore: number;
   status: IncidentStatus;
   isVerified: boolean;
+  isFakeReport: boolean;
   verifiedByUid: string | null;
   verifiedByName?: string | null;
-  reactions: {
-    useful: number;
-    beCareful: number;
-    watching: number;
-  };
+  views: number;
   commentCount: number;
+  comments: IncidentComment[];
+  source?: IncidentSource;
   createdAt: number;
   expiresAt: number;
+}
+
+export type CredibilityLevel = 'high' | 'medium' | 'low' | 'likely_fake';
+
+export interface CredibilityResult {
+  score: number;
+  level: CredibilityLevel;
+  factors: Record<string, number>;
+  flags: string[];
+}
+
+export interface PublicCamera {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  streamUrl: string;
+  thumbnailUrl?: string;
+  type: 'traffic' | 'urban' | 'coastal' | 'nature' | 'other';
+  country: string;
+  quality: 'high' | 'standard' | 'low';
+  source?: string;
+  scene?: string;
 }
 
 export interface UserProfile {
@@ -259,7 +291,9 @@ export type LogAction =
   | 'location_shared'
   | 'profile_updated'
   | 'family_created'
-  | 'family_member_added';
+  | 'family_member_added'
+  | 'incident_viewed'
+  | 'incident_commented';
 
 export interface ActivityLog {
   id: string;

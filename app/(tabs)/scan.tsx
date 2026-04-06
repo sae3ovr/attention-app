@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AttentionMap } from '../../src/components/map/AttentionMap';
 import type { MapMarker, GuardScanConfig } from '../../src/components/map/types';
 import { NeonText } from '../../src/components/ui/NeonText';
+import { LogoMark } from '../../src/components/ui/LogoMark';
 import { GlassCard } from '../../src/components/ui/GlassCard';
 import { useA11y, announce } from '../../src/hooks/useAccessibility';
 import { useHaptics } from '../../src/hooks/useHaptics';
@@ -22,7 +23,7 @@ const EMOJI_MAP: Record<string, string> = {
   'alert-outline': '⚠️', 'alert-octagon': '⚠️', 'dots-horizontal-circle': '🔵',
 };
 
-const USER_LOCATION = { latitude: -23.5505, longitude: -46.6333 };
+const USER_LOCATION = { latitude: 41.2356, longitude: -8.6200 };
 
 const RADIUS_OPTIONS = [
   { label: '500m', value: 500 },
@@ -45,7 +46,7 @@ function haversineDistance(a: { latitude: number; longitude: number }, b: { lati
 export default function ScanScreen() {
   const { colors, minTarget } = useA11y();
   const haptics = useHaptics();
-  const { showSidebar, isDesktop } = useResponsive();
+  const { showSidebar } = useResponsive();
   const incidents = useIncidentStore((s) => s.incidents);
   const loadIncidents = useIncidentStore((s) => s.loadIncidents);
   const lightTheme = useAccessibilityStore((s) => s.lightTheme);
@@ -54,7 +55,7 @@ export default function ScanScreen() {
   const [scanning, setScanning] = useState(false);
   const [scanDone, setScanDone] = useState(false);
   const [foundIncidents, setFoundIncidents] = useState<(Incident & { distance: number })[]>([]);
-  const [scanCenter, setScanCenter] = useState(USER_LOCATION);
+  const [scanCenter] = useState(USER_LOCATION);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => { loadIncidents(); }, []);
@@ -88,7 +89,7 @@ export default function ScanScreen() {
     setScanning(true);
     setScanDone(false);
     setFoundIncidents([]);
-    announce(`Scanning for incidents within ${formatDistance(selectedRadius)}`);
+    announce(`A escanear incidentes num raio de ${formatDistance(selectedRadius)}`);
 
     await loadIncidents();
 
@@ -104,7 +105,7 @@ export default function ScanScreen() {
       setScanning(false);
       setScanDone(true);
       haptics.success();
-      announce(`Scan complete. Found ${found.length} incidents within ${formatDistance(selectedRadius)}`);
+      announce(`Varredura completa. ${found.length} incidentes encontrados num raio de ${formatDistance(selectedRadius)}`);
     }, 2000);
   }, [selectedRadius, scanCenter]);
 
@@ -117,19 +118,19 @@ export default function ScanScreen() {
     <View style={[styles.panel, { backgroundColor: showSidebar ? colors.background : colors.surface }]}>
       <View style={styles.panelHeader}>
         <View style={styles.panelTitleRow}>
-          <MaterialCommunityIcons name="radar" size={22} color={colors.primary} />
+          <LogoMark size={28} color={Colors.primary} />
           <NeonText variant="h3" glow={colors.primaryGlow} style={{ marginLeft: Spacing.sm }}>
             GuardScan
           </NeonText>
         </View>
         <NeonText variant="caption" color={colors.textSecondary}>
-          Real-time area scan for incidents
+          Varredura em tempo real de incidentes na área
         </NeonText>
       </View>
 
       {/* Radius selector */}
       <View style={styles.radiusRow} accessible accessibilityRole="radiogroup"
-        accessibilityLabel={`Scan radius: ${formatDistance(selectedRadius)}`}>
+        accessibilityLabel={`Raio de varredura: ${formatDistance(selectedRadius)}`}>
         {RADIUS_OPTIONS.map((opt) => (
           <Pressable key={opt.value}
             onPress={() => { haptics.selection(); setSelectedRadius(opt.value); setScanDone(false); }}
@@ -139,7 +140,7 @@ export default function ScanScreen() {
               minHeight: minTarget, minWidth: minTarget,
               transform: [{ scale: pressed ? 0.92 : 1 }],
             }]}
-            accessible accessibilityLabel={`${opt.label} radius`}
+            accessible accessibilityLabel={`Raio de ${opt.label}`}
             accessibilityRole="radio" accessibilityState={{ selected: selectedRadius === opt.value }}>
             <NeonText variant="buttonSm" color={selectedRadius === opt.value ? colors.primary : colors.textSecondary}>
               {opt.label}
@@ -154,12 +155,12 @@ export default function ScanScreen() {
           backgroundColor: scanning ? colors.primary + '20' : pressed ? colors.primaryDim : colors.primary,
           opacity: scanning ? 0.7 : 1,
         }]}
-        accessible accessibilityLabel={scanning ? 'Scanning...' : 'Start GuardScan'}
+        accessible accessibilityLabel={scanning ? 'Escaneando...' : 'Iniciar GuardScan'}
         accessibilityRole="button">
         <Animated.View style={{ transform: [{ scale: scanning ? pulseAnim : 1 }], flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
           <MaterialCommunityIcons name="radar" size={20} color={scanning ? colors.primary : colors.background} />
           <NeonText variant="button" color={scanning ? colors.primary : colors.background}>
-            {scanning ? 'Scanning...' : 'Start Scan'}
+            {scanning ? 'A escanear...' : 'Iniciar Varredura'}
           </NeonText>
         </Animated.View>
       </Pressable>
@@ -169,10 +170,10 @@ export default function ScanScreen() {
         <View style={styles.results}>
           <View style={styles.resultsHeader}>
             <NeonText variant="label" color={colors.primary}>
-              {foundIncidents.length} incidents found
+              {foundIncidents.length} incidentes encontrados
             </NeonText>
             <NeonText variant="caption" color={colors.textTertiary}>
-              within {formatDistance(selectedRadius)}
+              num raio de {formatDistance(selectedRadius)}
             </NeonText>
           </View>
 
@@ -205,9 +206,9 @@ export default function ScanScreen() {
                       <View style={styles.resultStats}>
                         <NeonText variant="caption" color={Colors.success}>✓{inc.confirmCount}</NeonText>
                         <NeonText variant="caption" color={Colors.error}>✗{inc.denyCount}</NeonText>
-                        <NeonText variant="caption" color={Colors.warning}>🔥{inc.reactions.useful}</NeonText>
+                        <NeonText variant="caption" color={Colors.warning}>👁 {inc.views}</NeonText>
                         {inc.isVerified && (
-                          <NeonText variant="caption" color={colors.primary}>✅ Verified</NeonText>
+                          <NeonText variant="caption" color={Colors.success} glow={Colors.success} style={{ fontWeight: '800', letterSpacing: 0.5, textTransform: 'uppercase' }}>Verificado</NeonText>
                         )}
                       </View>
                     </View>
@@ -220,10 +221,10 @@ export default function ScanScreen() {
               <View style={styles.emptyResults}>
                 <MaterialCommunityIcons name="check-circle" size={36} color={Colors.success} />
                 <NeonText variant="body" color={Colors.success} style={{ marginTop: Spacing.sm }}>
-                  Area is clear!
+                  Área limpa!
                 </NeonText>
                 <NeonText variant="caption" color={colors.textTertiary} style={{ marginTop: Spacing.xs }}>
-                  No incidents within {formatDistance(selectedRadius)}
+                  Nenhum incidente num raio de {formatDistance(selectedRadius)}
                 </NeonText>
               </View>
             )}
@@ -253,7 +254,7 @@ export default function ScanScreen() {
               <GlassCard style={styles.scanLabelCard}>
                 <MaterialCommunityIcons name="radar" size={16} color={colors.primary} />
                 <NeonText variant="bodySm" color={colors.primary} style={{ marginLeft: Spacing.xs }}>
-                  Scanning {formatDistance(selectedRadius)} radius...
+                  Escaneando raio de {formatDistance(selectedRadius)}...
                 </NeonText>
               </GlassCard>
             </View>
@@ -277,7 +278,7 @@ export default function ScanScreen() {
       {/* Top bar */}
       <View style={[styles.topBar, { backgroundColor: colors.scrim }]}>
         <View style={styles.panelTitleRow}>
-          <MaterialCommunityIcons name="radar" size={20} color={colors.primary} />
+          <LogoMark size={28} color={Colors.primary} />
           <NeonText variant="h4" glow={colors.primaryGlow} style={{ marginLeft: Spacing.xs }}>
             GuardScan
           </NeonText>
@@ -312,7 +313,7 @@ export default function ScanScreen() {
           }]}>
           <MaterialCommunityIcons name="radar" size={18} color={scanning ? colors.primary : colors.background} />
           <NeonText variant="buttonSm" color={scanning ? colors.primary : colors.background} style={{ marginLeft: Spacing.xs }}>
-            {scanning ? 'Scanning...' : 'Scan'}
+            {scanning ? 'Escaneando...' : 'Escanear'}
           </NeonText>
         </Pressable>
 
@@ -364,6 +365,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
     borderRadius: Radius.full, borderWidth: 1,
     justifyContent: 'center', alignItems: 'center',
+    ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease', cursor: 'pointer' } as any : {}),
   },
   radiusChipSm: {
     paddingHorizontal: Spacing.sm, paddingVertical: 4,
@@ -374,6 +376,7 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.xl, paddingVertical: Spacing.md,
     borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center',
     marginBottom: Spacing.lg,
+    ...(Platform.OS === 'web' ? { transition: 'all 0.25s ease', cursor: 'pointer' } as any : {}),
   },
   scanButtonMobile: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -388,7 +391,10 @@ const styles = StyleSheet.create({
   },
   resultsList: { flex: 1 },
   resultsContent: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing['5xl'], gap: Spacing.sm },
-  resultCard: { padding: Spacing.md },
+  resultCard: {
+    padding: Spacing.md,
+    ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease' } as any : {}),
+  },
   resultRow: { flexDirection: 'row', alignItems: 'center' },
   resultIcon: {
     width: 38, height: 38, borderRadius: 10,

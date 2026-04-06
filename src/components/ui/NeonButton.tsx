@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle, StyleProp, ActivityIndicator, View, Animated, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useA11y, a11yProps } from '../../hooks/useAccessibility';
@@ -33,11 +33,13 @@ export function NeonButton({
   const { colors, typography, minTarget } = useA11y();
   const haptics = useHaptics();
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [hovered, setHovered] = useState(false);
 
   const variantStyles = {
     primary: {
       bg: colors.primary,
       bgPressed: colors.primaryDim,
+      bgHover: colors.primary + 'DD',
       text: colors.background,
       glow: colors.primaryGlow,
       border: colors.primary,
@@ -45,13 +47,15 @@ export function NeonButton({
     secondary: {
       bg: 'transparent',
       bgPressed: colors.primary + '18',
+      bgHover: colors.primary + '0D',
       text: colors.primary,
       glow: colors.primaryGlow,
-      border: colors.primary,
+      border: colors.primary + '60',
     },
     danger: {
       bg: colors.error,
       bgPressed: colors.errorDim,
+      bgHover: colors.error + 'DD',
       text: '#FFFFFF',
       glow: colors.errorGlow,
       border: colors.error,
@@ -59,6 +63,7 @@ export function NeonButton({
     ghost: {
       bg: 'transparent',
       bgPressed: 'rgba(255,255,255,0.08)',
+      bgHover: 'rgba(255,255,255,0.04)',
       text: colors.textSecondary,
       glow: 'transparent',
       border: colors.border,
@@ -75,7 +80,7 @@ export function NeonButton({
   const s = sizeStyles[size];
 
   const handlePressIn = () => {
-    Animated.spring(scaleAnim, { toValue: 0.93, useNativeDriver: true, speed: 50, bounciness: 4 }).start();
+    Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true, speed: 50, bounciness: 4 }).start();
   };
 
   const handlePressOut = () => {
@@ -88,8 +93,16 @@ export function NeonButton({
     onPress();
   };
 
+  const webHoverProps = Platform.OS === 'web' ? {
+    onMouseEnter: () => setHovered(true),
+    onMouseLeave: () => setHovered(false),
+  } : {};
+
   return (
-    <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, fullWidth && styles.fullWidth, style]}>
+    <Animated.View
+      style={[{ transform: [{ scale: scaleAnim }] }, fullWidth && styles.fullWidth, style]}
+      {...webHoverProps}
+    >
       <Pressable
         onPress={handlePress}
         onPressIn={handlePressIn}
@@ -97,16 +110,17 @@ export function NeonButton({
         disabled={disabled || loading}
         style={({ pressed }) => [
           styles.button,
+          Platform.OS === 'web' && styles.webButton,
           {
             height: s.height,
             minHeight: minTarget,
             paddingHorizontal: s.px,
-            backgroundColor: pressed ? v.bgPressed : v.bg,
-            borderColor: disabled ? colors.textDisabled : pressed ? v.glow : v.border,
+            backgroundColor: pressed ? v.bgPressed : hovered ? v.bgHover : v.bg,
+            borderColor: disabled ? colors.textDisabled : pressed ? v.glow : hovered ? v.border : v.border,
             opacity: disabled ? 0.4 : 1,
             shadowColor: v.glow,
-            shadowOpacity: variant === 'primary' && !disabled ? (pressed ? 0.9 : 0.5) : 0,
-            shadowRadius: pressed ? 24 : 16,
+            shadowOpacity: variant === 'primary' && !disabled ? (pressed ? 0.9 : hovered ? 0.7 : 0.4) : 0,
+            shadowRadius: pressed ? 28 : hovered ? 20 : 14,
             shadowOffset: { width: 0, height: pressed ? 2 : 4 },
             elevation: variant === 'primary' ? (pressed ? 12 : 8) : 0,
           },
@@ -114,7 +128,7 @@ export function NeonButton({
         ]}
         {...a11yProps(
           title,
-          accessibilityHint ?? `Activate to ${title.toLowerCase()}`,
+          accessibilityHint ?? `Ativar ${title.toLowerCase()}`,
           'button'
         )}
       >
@@ -153,7 +167,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    overflow: 'hidden',
   },
+  webButton: Platform.OS === 'web' ? {
+    transition: 'all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1)',
+    cursor: 'pointer',
+  } as any : {},
   fullWidth: {
     width: '100%',
   },

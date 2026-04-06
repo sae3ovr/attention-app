@@ -1,6 +1,6 @@
 import { COLLECTIONS } from '../config/firebase';
 import type {
-  UserProfile, Incident, Chain, ChainMember, ChainMessage,
+  UserProfile, Incident, IncidentComment, Chain, ChainMember, ChainMessage,
   ChainAlert, FamilyGroup, FamilyMember, ActivityLog, LogAction,
   GeoPosition, NotificationItem, FeedItem,
 } from '../types';
@@ -68,7 +68,8 @@ export const UserDB = {
   async updateLocation(uid: string, location: GeoPosition): Promise<void> {
     const existing = stores[COLLECTIONS.USERS].get(uid);
     if (existing) {
-      stores[COLLECTIONS.USERS].set(uid, { ...existing, lastActiveAt: Date.now() });
+      stores[COLLECTIONS.USERS].set(uid, { ...existing, lastActiveAt: Date.now(), lastLocation: location });
+      notifyListeners(COLLECTIONS.USERS);
     }
   },
 
@@ -118,28 +119,76 @@ export const IncidentDB = {
 
   async confirm(id: string, uid: string): Promise<void> {
     const inc = stores[COLLECTIONS.INCIDENTS].get(id);
-    if (inc) {
-      stores[COLLECTIONS.INCIDENTS].set(id, {
-        ...inc,
-        confirmCount: inc.confirmCount + 1,
-        credibilityScore: inc.credibilityScore + 1.5,
-      });
-      notifyListeners(COLLECTIONS.INCIDENTS);
-      await LogDB.write(uid, 'incident_confirmed', id, 'incident');
+    if (!inc || inc.isFakeReport) return;
+    const newCount = inc.confirmCount + 1;
+    const autoVerified = !inc.isVerified && newCount >= 10;
+    stores[COLLECTIONS.INCIDENTS].set(id, {
+      ...inc,
+      confirmCount: newCount,
+      credibilityScore: inc.credibilityScore + 1.5,
+      ...(autoVerified && {
+        isVerified: true,
+        verifiedByUid: 'community',
+        verifiedByName: 'Community Verified',
+      }),
+    });
+    notifyListeners(COLLECTIONS.INCIDENTS);
+    await LogDB.write(uid, 'incident_confirmed', id, 'incident');
+    if (autoVerified) {
+      await LogDB.write('system', 'incident_verified', id, 'incident', { method: 'community_vote', confirms: newCount });
     }
   },
 
   async deny(id: string, uid: string): Promise<void> {
     const inc = stores[COLLECTIONS.INCIDENTS].get(id);
-    if (inc) {
-      stores[COLLECTIONS.INCIDENTS].set(id, {
-        ...inc,
-        denyCount: inc.denyCount + 1,
-        credibilityScore: inc.credibilityScore - 1,
-      });
-      notifyListeners(COLLECTIONS.INCIDENTS);
-      await LogDB.write(uid, 'incident_denied', id, 'incident');
+    if (!inc || inc.isFakeReport) return;
+    const newCount = inc.denyCount + 1;
+    const autoFake = !inc.isFakeReport && newCount >= 10;
+    stores[COLLECTIONS.INCIDENTS].set(id, {
+      ...inc,
+      denyCount: newCount,
+      credibilityScore: inc.credibilityScore - 1,
+      ...(autoFake && {
+        isFakeReport: true,
+        status: 'removed' as const,
+      }),
+    });
+    notifyListeners(COLLECTIONS.INCIDENTS);
+    await LogDB.write(uid, 'incident_denied', id, 'incident');
+    if (autoFake) {
+      await LogDB.write('system', 'incident_removed', id, 'incident', { method: 'community_vote', denies: newCount });
     }
+  },
+
+  async view(id: string, uid: string): Promise<void> {
+    const inc = stores[COLLECTIONS.INCIDENTS].get(id);
+    if (inc) {
+      stores[COLLECTIONS.INCIDENTS].set(id, { ...inc, views: inc.views + 1 });
+      notifyListeners(COLLECTIONS.INCIDENTS);
+      await LogDB.write(uid, 'incident_viewed', id, 'incident');
+    }
+  },
+
+  async addComment(id: string, uid: string, userName: string, userLevel: number, text: string): Promise<void> {
+    const inc = stores[COLLECTIONS.INCIDENTS].get(id);
+    if (!inc) return;
+    const trimmed = text.slice(0, 200);
+    if (!trimmed.trim()) return;
+    const comment: IncidentComment = {
+      id: `cmt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      uid,
+      userName,
+      userLevel,
+      text: trimmed,
+      createdAt: Date.now(),
+    };
+    stores[COLLECTIONS.INCIDENTS].set(id, {
+      ...inc,
+      comments: [...inc.comments, comment],
+      commentCount: inc.commentCount + 1,
+    });
+    notifyListeners(COLLECTIONS.INCIDENTS);
+    await LogDB.write(uid, 'incident_commented', id, 'incident');
   },
 
   async verify(id: string, guardianUid: string, guardianName: string): Promise<void> {
@@ -298,6 +347,7 @@ export const ChainMessageDB = {
     if (msg && !msg.readBy.includes(uid)) {
       msg.readBy.push(uid);
       stores[COLLECTIONS.CHAIN_MESSAGES].set(messageId, msg);
+      notifyListeners(COLLECTIONS.CHAIN_MESSAGES);
     }
   },
 

@@ -1,13 +1,13 @@
 export const Colors = {
-  background: '#060610',
-  backgroundLight: '#0D0D1A',
-  surface: '#13132A',
-  surfaceLight: '#1E1E3A',
+  background: '#0D1117',
+  backgroundLight: '#161B22',
+  surface: '#1C2333',
+  surfaceLight: '#21293A',
 
-  primary: '#00FFAA',
-  primaryDim: '#00CC88',
-  primaryGlow: 'rgba(0, 255, 170, 0.35)',
-  primarySubtle: 'rgba(0, 255, 170, 0.08)',
+  primary: '#00FF88',
+  primaryDim: '#00CC6E',
+  primaryGlow: 'rgba(0, 255, 136, 0.35)',
+  primarySubtle: 'rgba(0, 255, 136, 0.08)',
 
   secondary: '#7B61FF',
   secondaryDim: '#6248D6',
@@ -31,20 +31,20 @@ export const Colors = {
   cyan: '#00D4FF',
   cyanGlow: 'rgba(0, 212, 255, 0.35)',
 
-  textPrimary: '#EEEEFF',
-  textSecondary: '#8A8AAA',
-  textTertiary: '#5A5A7A',
-  textDisabled: '#3A3A5A',
+  textPrimary: '#E6EDF3',
+  textSecondary: '#8B949E',
+  textTertiary: '#6E7681',
+  textDisabled: '#484F58',
 
   border: 'rgba(255, 255, 255, 0.08)',
   borderLight: 'rgba(255, 255, 255, 0.04)',
   borderFocused: 'rgba(0, 255, 170, 0.5)',
 
   glass: {
-    background: 'rgba(20, 20, 50, 0.65)',
-    backgroundHover: 'rgba(30, 30, 60, 0.75)',
-    border: 'rgba(255, 255, 255, 0.10)',
-    borderLight: 'rgba(255, 255, 255, 0.05)',
+    background: 'rgba(13, 17, 23, 0.75)',
+    backgroundHover: 'rgba(22, 27, 34, 0.85)',
+    border: 'rgba(255, 255, 255, 0.08)',
+    borderLight: 'rgba(255, 255, 255, 0.04)',
     shadow: 'rgba(0, 0, 0, 0.6)',
   },
 
@@ -74,8 +74,8 @@ export const Colors = {
   overlay: 'rgba(0, 0, 0, 0.75)',
   scrim: 'rgba(6, 6, 16, 0.88)',
 
-  guardian: '#00FFAA',
-  guardianGlow: 'rgba(0, 255, 170, 0.45)',
+  guardian: '#00FF88',
+  guardianGlow: 'rgba(0, 255, 136, 0.45)',
 } as const;
 
 export const LightColors = {
@@ -170,7 +170,7 @@ export const HighContrastColors = {
   accent: '#FF5B9A',
   warning: '#FFD800',
   error: '#FF6666',
-  success: '#00FFAA',
+  success: '#00FF88',
 
   textPrimary: '#FFFFFF',
   textSecondary: '#CCCCCC',

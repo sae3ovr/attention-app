@@ -182,9 +182,11 @@ class AttentionSDKSingleton {
       credibilityScore: 5,
       status: 'active',
       isVerified: false,
+      isFakeReport: false,
       verifiedByUid: null,
-      reactions: { useful: 0, beCareful: 0, watching: 0 },
+      views: 0,
       commentCount: 0,
+      comments: [],
       createdAt: Date.now(),
       expiresAt: Date.now() + 86400000,
     });

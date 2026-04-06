@@ -112,7 +112,7 @@ function UserLocationMarker({ coordinate }: { coordinate: { latitude: number; lo
         <View style={styles.userDot}>
           <MaterialCommunityIcons name="account" size={12} color="#fff" />
         </View>
-        <Text style={styles.userLabel}>You</Text>
+        <Text style={styles.userLabel}>Você</Text>
       </View>
     </Marker>
   );
@@ -120,12 +120,13 @@ function UserLocationMarker({ coordinate }: { coordinate: { latitude: number; lo
 
 function formatMemberSinceNative(ts: number): string {
   const days = Math.floor((Date.now() - ts) / 86400000);
-  if (days < 30) return `${days}d ago`;
+  if (days === 0) return 'hoje';
+  if (days < 30) return `${days}d atrás`;
   const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
+  if (months < 12) return `${months} meses`;
   const years = Math.floor(months / 12);
   const rem = months % 12;
-  return rem > 0 ? `${years}y ${rem}mo` : `${years}y`;
+  return rem > 0 ? `${years}a ${rem}m` : `${years}a`;
 }
 
 function formatReputationNative(rep: number): string {
@@ -173,7 +174,7 @@ function ProfileCardNative({ profile }: { profile: UserProfileCard }) {
         </View>
       </View>
       <View style={nStyles.cardFooter}>
-        <Text style={nStyles.cardMeta}>Since {formatMemberSinceNative(profile.memberSince)}</Text>
+        <Text style={nStyles.cardMeta}>Membro há {formatMemberSinceNative(profile.memberSince)}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <View style={[nStyles.cardOnlineDot, { backgroundColor: onlineColor }]} />
           <Text style={[nStyles.cardOnlineText, { color: onlineColor }]}>
@@ -365,6 +366,7 @@ export function AttentionMap({
   driveMode,
   speedCameras,
   initialRegion,
+  focusLocation,
 }: AttentionMapProps) {
   const mapViewRef = useRef<MapView>(null);
   const [zoomLevel, setZoomLevel] = useState(13);
@@ -381,6 +383,17 @@ export function AttentionMap({
       mapViewRef.current.animateCamera({ pitch: 0, heading: 0 }, { duration: 600 });
     }
   }, [driveMode]);
+
+  useEffect(() => {
+    if (focusLocation && mapViewRef.current) {
+      mapViewRef.current.animateToRegion({
+        latitude: focusLocation.latitude,
+        longitude: focusLocation.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      }, 1200);
+    }
+  }, [focusLocation]);
 
   const routeCoords = navigation?.coordinates?.map(([lng, lat]) => ({ latitude: lat, longitude: lng })) || [];
 

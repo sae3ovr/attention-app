@@ -10,6 +10,7 @@ import { useA11y, announce } from '../../src/hooks/useAccessibility';
 import { useHaptics } from '../../src/hooks/useHaptics';
 import { useIncidentStore } from '../../src/stores/incidentStore';
 import { CATEGORIES } from '../../src/constants/categories';
+import { LogoMark } from '../../src/components/ui/LogoMark';
 import { Colors } from '../../src/theme/colors';
 import { Spacing, Radius } from '../../src/theme/spacing';
 import type { IncidentCategory, IncidentSeverity } from '../../src/types';
@@ -76,7 +77,10 @@ export default function ReportScreen() {
             color={colors.textPrimary}
           />
         </Pressable>
-        <NeonText variant="h4">Report Incident</NeonText>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <LogoMark size={22} color={Colors.primary} />
+          <NeonText variant="h4">Reportar Incidente</NeonText>
+        </View>
         <NeonText variant="bodySm" color={colors.textTertiary}>
           Step {step + 1}/3
         </NeonText>

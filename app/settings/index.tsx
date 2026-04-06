@@ -7,6 +7,7 @@ import { GlassCard } from '../../src/components/ui/GlassCard';
 import { useA11y, announce } from '../../src/hooks/useAccessibility';
 import { useHaptics } from '../../src/hooks/useHaptics';
 import { useAuthStore } from '../../src/stores/authStore';
+import { LogoMark } from '../../src/components/ui/LogoMark';
 import { Colors } from '../../src/theme/colors';
 import { Spacing } from '../../src/theme/spacing';
 
@@ -192,11 +193,12 @@ export default function SettingsScreen() {
 
       {/* App info */}
       <View style={styles.appInfo}>
-        <NeonText variant="caption" color={colors.textTertiary} style={styles.appInfoText}>
-          Attention v1.0.0
+        <LogoMark size={32} color={Colors.primary} />
+        <NeonText variant="caption" color={colors.textTertiary} style={[styles.appInfoText, { marginTop: 8 }]}>
+          Alert.io v2.0
         </NeonText>
         <NeonText variant="caption" color={colors.textTertiary} style={styles.appInfoText}>
-          Community safety, in your hands.
+          From alert to action.
         </NeonText>
       </View>
     </ScrollView>

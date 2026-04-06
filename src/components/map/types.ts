@@ -1,4 +1,4 @@
-import type { Incident, GeoPosition, FamilyMember } from '../../types';
+import type { Incident, GeoPosition, FamilyMember, PublicCamera } from '../../types';
 
 export interface MapMarker {
   id: string;
@@ -36,6 +36,7 @@ export interface AttentionMapProps {
   onMapPress?: () => void;
   onMapReady?: () => void;
   selectedMarkerId?: string | null;
+  highlightedMarkerId?: string | null;
   guardScan?: GuardScanConfig | null;
   lightTheme?: boolean;
   navigation?: NavigationRoute | null;
@@ -47,6 +48,11 @@ export interface AttentionMapProps {
     latitudeDelta: number;
     longitudeDelta: number;
   };
+  focusLocation?: { latitude: number; longitude: number; zoom?: number } | null;
+  cameras?: PublicCamera[];
+  onCameraPress?: (camera: PublicCamera) => void;
+  showCameras?: boolean;
+  onToggleCameras?: () => void;
 }
 
 export const DEFAULT_REGION = {

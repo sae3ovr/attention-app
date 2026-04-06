@@ -7,7 +7,7 @@ export const MOCK_USER: UserProfile = {
   photoURL: null,
   reputation: 203750,
   level: 31,
-  levelName: 'Guardian',
+  levelName: 'Guardião',
   levelIcon: '🛡️',
   isGuardian: true,
   isProbationary: false,
@@ -35,8 +35,8 @@ export const MOCK_INCIDENTS: Incident[] = [
     reporterBadge: 'Sentinela de Bairro',
     category: 'robbery',
     severity: 'high',
-    title: 'Attempted robbery near Maia train station',
-    description: 'Two individuals on a motorcycle attempted to grab a phone from a pedestrian near the Maia station exit.',
+    title: 'Tentativa de assalto perto da estação de Maia',
+    description: 'Dois indivíduos em uma moto tentaram roubar o celular de um pedestre perto da saída da estação da Maia.',
     location: { latitude: 41.2356, longitude: -8.6200 },
     geohash: 'ez3q6yf1x',
     address: 'R. Dr. Carlos Felgueiras, Maia Centro',
@@ -46,10 +46,12 @@ export const MOCK_INCIDENTS: Incident[] = [
     credibilityScore: 18.5,
     status: 'active',
     isVerified: true,
+    isFakeReport: false,
     verifiedByUid: 'guardian-001',
     verifiedByName: 'Eduardo Q.',
-    reactions: { useful: 45, beCareful: 23, watching: 67 },
+    views: 135,
     commentCount: 8,
+    comments: [],
     createdAt: Date.now() - 1200000,
     expiresAt: Date.now() + 85200000,
   },
@@ -61,8 +63,8 @@ export const MOCK_INCIDENTS: Incident[] = [
     reporterBadge: 'Patrulheiro Local',
     category: 'accident',
     severity: 'medium',
-    title: 'Car collision on Av. Visconde de Barreiros',
-    description: 'Two vehicles collided at the roundabout. No serious injuries reported, but traffic is blocked.',
+    title: 'Colisão de carros na Av. Visconde de Barreiros',
+    description: 'Dois veículos colidiram na rotunda. Sem ferimentos graves, mas o trânsito está bloqueado.',
     location: { latitude: 41.2450, longitude: -8.6350 },
     geohash: 'ez3q6ybcz',
     address: 'Av. Visconde de Barreiros, Castêlo da Maia',
@@ -72,9 +74,11 @@ export const MOCK_INCIDENTS: Incident[] = [
     credibilityScore: 12.0,
     status: 'active',
     isVerified: false,
+    isFakeReport: false,
     verifiedByUid: null,
-    reactions: { useful: 22, beCareful: 5, watching: 31 },
+    views: 58,
     commentCount: 3,
+    comments: [],
     createdAt: Date.now() - 2700000,
     expiresAt: Date.now() + 83700000,
   },
@@ -86,8 +90,8 @@ export const MOCK_INCIDENTS: Incident[] = [
     reporterBadge: 'Escudo Popular',
     category: 'suspicious',
     severity: 'low',
-    title: 'Suspicious person watching parked cars',
-    description: 'A person has been walking around the parking lot looking inside cars for the last 30 minutes.',
+    title: 'Pessoa suspeita observando carros estacionados',
+    description: 'Uma pessoa está andando pelo estacionamento olhando dentro dos carros há 30 minutos.',
     location: { latitude: 41.2250, longitude: -8.6080 },
     geohash: 'ez3q6yf3q',
     address: 'Zona Industrial da Maia, Águas Santas',
@@ -97,9 +101,11 @@ export const MOCK_INCIDENTS: Incident[] = [
     credibilityScore: 4.0,
     status: 'active',
     isVerified: false,
+    isFakeReport: false,
     verifiedByUid: null,
-    reactions: { useful: 8, beCareful: 12, watching: 19 },
+    views: 39,
     commentCount: 5,
+    comments: [],
     createdAt: Date.now() - 5400000,
     expiresAt: Date.now() + 81000000,
   },
@@ -111,8 +117,8 @@ export const MOCK_INCIDENTS: Incident[] = [
     reporterBadge: 'Repórter de Rua',
     category: 'fire',
     severity: 'critical',
-    title: 'Building fire on R. do Lidador',
-    description: 'Visible flames and heavy smoke coming from a building. Bombeiros have been called.',
+    title: 'Incêndio em edifício na R. do Lidador',
+    description: 'Chamas visíveis e fumaça intensa saindo de um edifício. Os bombeiros foram chamados.',
     location: { latitude: 41.2480, longitude: -8.6100 },
     geohash: 'ez3q6yb9z',
     address: 'R. do Lidador, Moreira da Maia',
@@ -122,10 +128,12 @@ export const MOCK_INCIDENTS: Incident[] = [
     credibilityScore: 42.0,
     status: 'active',
     isVerified: true,
+    isFakeReport: false,
     verifiedByUid: 'guardian-001',
     verifiedByName: 'Eduardo Q.',
-    reactions: { useful: 89, beCareful: 67, watching: 120 },
+    views: 276,
     commentCount: 15,
+    comments: [],
     createdAt: Date.now() - 600000,
     expiresAt: Date.now() + 85800000,
   },
@@ -137,8 +145,8 @@ export const MOCK_INCIDENTS: Incident[] = [
     reporterBadge: 'Agente Comunitário',
     category: 'police',
     severity: 'medium',
-    title: 'GNR checkpoint on EN13',
-    description: 'GNR set up a checkpoint on the national road. Expect delays of approximately 20 minutes.',
+    title: 'Blitz da GNR na EN13',
+    description: 'A GNR montou uma blitz na estrada nacional. Espere atrasos de aproximadamente 20 minutos.',
     location: { latitude: 41.2180, longitude: -8.6380 },
     geohash: 'ez3q6yf6r',
     address: 'EN13, Pedrouços',
@@ -148,9 +156,11 @@ export const MOCK_INCIDENTS: Incident[] = [
     credibilityScore: 22.0,
     status: 'active',
     isVerified: false,
+    isFakeReport: false,
     verifiedByUid: null,
-    reactions: { useful: 55, beCareful: 10, watching: 42 },
+    views: 107,
     commentCount: 7,
+    comments: [],
     createdAt: Date.now() - 3600000,
     expiresAt: Date.now() + 82800000,
   },
@@ -162,8 +172,8 @@ export const MOCK_INCIDENTS: Incident[] = [
     reporterBadge: 'Guardian',
     category: 'traffic',
     severity: 'low',
-    title: 'Traffic jam near Maia Jardim',
-    description: 'Heavy traffic due to road work near the shopping center. Use alternative routes.',
+    title: 'Engarrafamento perto do Maia Jardim',
+    description: 'Trânsito intenso devido a obras perto do shopping center. Use rotas alternativas.',
     location: { latitude: 41.2520, longitude: -8.6450 },
     geohash: 'ez3q6ybwx',
     address: 'Maia Jardim, Vermoim',
@@ -173,9 +183,11 @@ export const MOCK_INCIDENTS: Incident[] = [
     credibilityScore: 9.0,
     status: 'active',
     isVerified: false,
+    isFakeReport: false,
     verifiedByUid: null,
-    reactions: { useful: 30, beCareful: 2, watching: 15 },
+    views: 47,
     commentCount: 2,
+    comments: [],
     createdAt: Date.now() - 7200000,
     expiresAt: Date.now() + 79200000,
   },
@@ -259,9 +271,9 @@ export const MOCK_USER_PROFILES: Record<string, UserProfileCard> = {
     photoURL: null,
     reputation: 203750,
     level: 31,
-    levelName: 'Guardian',
+    levelName: 'Guardião',
     levelIcon: '🛡️',
-    badge: 'Guardian',
+    badge: 'Guardião',
     badgeColor: '#00FFAA',
     isGuardian: true,
     totalReports: 1842,
@@ -269,7 +281,7 @@ export const MOCK_USER_PROFILES: Record<string, UserProfileCard> = {
     verifiedIncidents: 312,
     memberSince: Date.now() - 365 * 86400000,
     lastActive: Date.now(),
-    fame: 'Legendary Protector',
+    fame: 'Protetor Lendário',
     role: 'admin',
     batteryLevel: 85,
     isOnline: true,
@@ -280,7 +292,7 @@ export const MOCK_USER_PROFILES: Record<string, UserProfileCard> = {
     photoURL: null,
     reputation: 8450,
     level: 14,
-    levelName: 'Neighborhood Guardian',
+    levelName: 'Guardiã da Vizinhança',
     levelIcon: '🏰',
     badge: 'Guardião da Vizinhança',
     badgeColor: '#EAB308',
@@ -290,7 +302,7 @@ export const MOCK_USER_PROFILES: Record<string, UserProfileCard> = {
     verifiedIncidents: 0,
     memberSince: Date.now() - 280 * 86400000,
     lastActive: Date.now() - 1200000,
-    fame: 'Trusted Watcher',
+    fame: 'Vigilante de Confiança',
     role: 'member',
     batteryLevel: 63,
     isOnline: true,
@@ -301,7 +313,7 @@ export const MOCK_USER_PROFILES: Record<string, UserProfileCard> = {
     photoURL: null,
     reputation: 350,
     level: 4,
-    levelName: 'Community Scout',
+    levelName: 'Olheiro Comunitário',
     levelIcon: '👀',
     badge: 'Olheiro Comunitário',
     badgeColor: '#A78BFA',
@@ -311,7 +323,7 @@ export const MOCK_USER_PROFILES: Record<string, UserProfileCard> = {
     verifiedIncidents: 0,
     memberSince: Date.now() - 90 * 86400000,
     lastActive: Date.now() - 300000,
-    fame: 'Rising Star',
+    fame: 'Estrela em Ascensão',
     role: 'kid',
     batteryLevel: 72,
     isOnline: true,
@@ -322,7 +334,7 @@ export const MOCK_USER_PROFILES: Record<string, UserProfileCard> = {
     photoURL: null,
     reputation: 2800,
     level: 9,
-    levelName: 'Corner Guardian',
+    levelName: 'Guardiã de Esquina',
     levelIcon: '🚦',
     badge: 'Guardião de Esquina',
     badgeColor: '#EC4899',
@@ -332,105 +344,98 @@ export const MOCK_USER_PROFILES: Record<string, UserProfileCard> = {
     verifiedIncidents: 0,
     memberSince: Date.now() - 200 * 86400000,
     lastActive: Date.now() - 7200000,
-    fame: 'Reliable Reporter',
+    fame: 'Repórter Confiável',
     role: 'member',
     batteryLevel: 14,
     isOnline: false,
   },
 };
 
-export const MOCK_FEED: FeedItem[] = [
-  {
-    id: 'feed-001',
-    type: 'incident_verified',
-    actorName: 'Eduardo Q.',
-    actorLevel: 31,
-    summary: 'You verified the building fire on R. do Lidador as Guardian',
-    createdAt: Date.now() - 300000,
-  },
-  {
-    id: 'feed-002',
-    type: 'new_incident',
-    actorName: 'Maria Lima',
-    actorLevel: 8,
-    summary: 'Maria reported a robbery near Maia train station',
-    createdAt: Date.now() - 1200000,
-  },
-  {
-    id: 'feed-003',
-    type: 'incident_verified',
-    actorName: 'Guardian Torres',
-    actorLevel: 31,
-    summary: 'Guardian Torres verified the GNR checkpoint on EN13',
-    createdAt: Date.now() - 1800000,
-  },
-  {
-    id: 'feed-004',
-    type: 'new_incident',
-    actorName: 'Carlos Melo',
-    actorLevel: 3,
-    summary: 'Carlos reported a fire on R. do Lidador — awaiting verification',
-    createdAt: Date.now() - 2400000,
-  },
-  {
-    id: 'feed-005',
-    type: 'user_leveled_up',
-    actorName: 'João Costa',
-    actorLevel: 5,
-    summary: 'João reached Level 5 — Patrulheiro Local!',
-    createdAt: Date.now() - 3600000,
-  },
-  {
-    id: 'feed-006',
-    type: 'new_incident',
-    actorName: 'Ana Oliveira',
-    actorLevel: 15,
-    summary: 'Ana reported a suspicious person near Zona Industrial da Maia',
-    createdAt: Date.now() - 5400000,
-  },
-  {
-    id: 'feed-007',
-    type: 'new_incident',
-    actorName: 'Lucia Ferreira',
-    actorLevel: 12,
-    summary: 'Lucia reported a GNR checkpoint on EN13',
-    createdAt: Date.now() - 7200000,
-  },
-  {
-    id: 'feed-008',
-    type: 'user_became_guardian',
-    actorName: 'Renata Alves',
-    actorLevel: 31,
-    summary: 'Renata reached 200,000 pts and became a Guardian!',
-    createdAt: Date.now() - 86400000,
-  },
-  {
-    id: 'feed-009',
-    type: 'user_leveled_up',
-    actorName: 'Diego Martins',
-    actorLevel: 20,
-    summary: 'Diego reached Level 20 — Sentinela de Ouro! GuardScan 5km unlocked.',
-    createdAt: Date.now() - 90000000,
-  },
-  {
-    id: 'feed-010',
-    type: 'incident_verified',
-    actorName: 'Eduardo Q.',
-    actorLevel: 31,
-    summary: 'You removed a false robbery report near R. Dr. Carlos Felgueiras as Guardian',
-    createdAt: Date.now() - 172800000,
-  },
+const FEED_NAMES = [
+  'Eduardo Q.', 'Maria Lima', 'Carlos Melo', 'João Costa', 'Ana Oliveira',
+  'Lucia Ferreira', 'Renata Alves', 'Diego Martins', 'Sofia Mendes', 'Pedro Rocha',
+  'Beatriz Santos', 'Rafael Nunes', 'Inês Cardoso', 'Tiago Moreira', 'Clara Vieira',
+  'Bruno Lopes', 'Mariana Pinto', 'André Sousa', 'Helena Ribeiro', 'Gustavo Correia',
 ];
+
+const FEED_LOCATIONS = [
+  'R. do Lidador', 'Av. da República', 'Praça do Infante', 'R. de Santa Catarina',
+  'Cais de Gaia', 'Ponte D. Luís I', 'Estação de São Bento', 'Foz do Douro',
+  'Zona Industrial da Maia', 'EN13', 'R. Dr. Carlos Felgueiras', 'Parque da Cidade',
+  'Av. dos Aliados', 'Mercado do Bolhão', 'R. das Flores', 'Hospital S. João',
+  'Universidade do Porto', 'Centro Comercial NorteShopping', 'Matosinhos Sul', 'Praça da Batalha',
+];
+
+const FEED_INCIDENT_TYPES = [
+  'assalto', 'incêndio', 'acidente de trânsito', 'pessoa suspeita', 'atividade policial',
+  'emergência médica', 'ruído excessivo', 'inundação', 'veículo abandonado', 'fuga de gás',
+  'roubo de veículo', 'agressão', 'vandalismo', 'queda de árvore', 'animal ferido',
+];
+
+function generateRandomFeed(count: number): FeedItem[] {
+  const items: FeedItem[] = [];
+  const types: FeedItem['type'][] = ['new_incident', 'incident_verified', 'user_leveled_up', 'user_became_guardian'];
+  const weights = [0.5, 0.25, 0.15, 0.1];
+
+  for (let i = 0; i < count; i++) {
+    const rand = Math.random();
+    let type: FeedItem['type'] = 'new_incident';
+    let cumulative = 0;
+    for (let j = 0; j < types.length; j++) {
+      cumulative += weights[j];
+      if (rand < cumulative) { type = types[j]; break; }
+    }
+
+    const name = FEED_NAMES[Math.floor(Math.random() * FEED_NAMES.length)];
+    const loc = FEED_LOCATIONS[Math.floor(Math.random() * FEED_LOCATIONS.length)];
+    const incType = FEED_INCIDENT_TYPES[Math.floor(Math.random() * FEED_INCIDENT_TYPES.length)];
+    const level = type === 'user_became_guardian' ? 31 : type === 'incident_verified' ? Math.floor(Math.random() * 10) + 22 : Math.floor(Math.random() * 28) + 1;
+    const firstName = name.split(' ')[0];
+
+    let summary: string;
+    switch (type) {
+      case 'new_incident':
+        summary = `${firstName} relatou ${incType} perto de ${loc}`;
+        break;
+      case 'incident_verified':
+        summary = `Guardião ${firstName} verificou ${incType} na ${loc}`;
+        break;
+      case 'user_leveled_up':
+        summary = `${firstName} alcançou o Nível ${level} — ${level >= 20 ? 'Sentinela de Ouro' : level >= 10 ? 'Vigilante' : 'Patrulheiro'}!`;
+        break;
+      case 'user_became_guardian':
+        summary = `${firstName} alcançou 200.000 pts e se tornou Guardião!`;
+        break;
+    }
+
+    const timeOffset = i === 0
+      ? Math.floor(Math.random() * 120000)
+      : Math.floor(Math.random() * 3600000) + i * 300000;
+
+    items.push({
+      id: `feed-${String(i + 1).padStart(3, '0')}`,
+      type,
+      actorName: name,
+      actorLevel: level,
+      summary,
+      createdAt: Date.now() - timeOffset,
+    });
+  }
+
+  return items.sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export const MOCK_FEED: FeedItem[] = generateRandomFeed(30);
 
 export function timeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
-  if (seconds < 60) return 'just now';
+  if (seconds < 60) return 'agora mesmo';
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return `${minutes}m atrás`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return `${hours}h atrás`;
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return `${days}d atrás`;
 }
 
 export function formatDistance(meters: number): string {

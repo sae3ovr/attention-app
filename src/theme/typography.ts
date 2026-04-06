@@ -34,9 +34,9 @@ export function createTypography(largeText = false) {
   return {
     hero: {
       fontSize: sizes['5xl'],
-      fontWeight: '800',
-      letterSpacing: -1.5,
-      lineHeight: sizes['5xl'] * 1.1,
+      fontWeight: '900',
+      letterSpacing: 4,
+      lineHeight: sizes['5xl'] * 1.15,
     } satisfies TextStyle,
 
     h1: {

@@ -243,7 +243,7 @@ export function SafetyButton({
             },
           ]}
           activeOpacity={0.8}
-          accessibilityLabel="Attention Safety Button"
+          accessibilityLabel="Alert.io Safety Button"
           accessibilityRole="button"
           accessibilityHint="Tap to expand safety options. Long press for SOS."
         >
