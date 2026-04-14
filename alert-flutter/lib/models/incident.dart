@@ -67,8 +67,29 @@ class TrackedItem {
   final String icon;
   final double? latitude;
   final double? longitude;
+  final DateTime? lastUpdated;
 
-  TrackedItem({required this.id, required this.name, required this.itemType, this.icon = 'map-marker', this.latitude, this.longitude});
+  TrackedItem({required this.id, required this.name, required this.itemType, this.icon = 'map-marker', this.latitude, this.longitude, this.lastUpdated});
+
+  bool get hasLocation => latitude != null && longitude != null;
+
+  String get lastSeenLabel {
+    if (lastUpdated == null) return 'Never';
+    final diff = DateTime.now().difference(lastUpdated!);
+    if (diff.inSeconds < 60) return '${diff.inSeconds}s ago';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
+  }
+
+  TrackedItem copyWith({double? latitude, double? longitude, DateTime? lastUpdated}) {
+    return TrackedItem(
+      id: id, name: name, itemType: itemType, icon: icon,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+    );
+  }
 
   factory TrackedItem.fromJson(Map<String, dynamic> json) {
     return TrackedItem(
@@ -78,6 +99,7 @@ class TrackedItem {
       icon: json['icon'] ?? 'map-marker',
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
+      lastUpdated: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'].toString()) : null,
     );
   }
 }

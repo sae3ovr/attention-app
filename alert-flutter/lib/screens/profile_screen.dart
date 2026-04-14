@@ -184,19 +184,73 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ]),
               )
             else ...[
-              ...tracked.items.map((item) => Container(
-                margin: const EdgeInsets.only(bottom: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
-                child: Row(children: [
-                  Icon(_typeIcon(item.itemType), color: AppColors.secondary, size: 18),
-                  const SizedBox(width: 10),
-                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(item.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
-                    Text(item.itemType.toUpperCase(), style: const TextStyle(color: AppColors.textTertiary, fontSize: 8, letterSpacing: 1)),
-                  ])),
-                ]),
-              )),
+              ...tracked.items.map((item) {
+                final color = _typeColor(item.itemType);
+                final hasLoc = item.hasLocation;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Row(children: [
+                      Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: color.withAlpha(25), border: Border.all(color: color.withAlpha(80))),
+                        child: Icon(_typeIcon(item.itemType), color: color, size: 16),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(item.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                        Row(children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                            decoration: BoxDecoration(color: color.withAlpha(20), borderRadius: BorderRadius.circular(3)),
+                            child: Text(item.itemType.toUpperCase(), style: TextStyle(color: color, fontSize: 7, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(width: 5, height: 5, decoration: BoxDecoration(shape: BoxShape.circle, color: hasLoc ? AppColors.success : AppColors.textTertiary)),
+                          const SizedBox(width: 3),
+                          Text(hasLoc ? item.lastSeenLabel : 'No location', style: TextStyle(color: hasLoc ? AppColors.textSecondary : AppColors.textTertiary, fontSize: 9)),
+                        ]),
+                      ])),
+                      GestureDetector(
+                        onTap: () => _confirmDelete(item),
+                        child: Container(
+                          width: 28, height: 28,
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(6), color: AppColors.error.withAlpha(15)),
+                          child: const Icon(Icons.delete_outline, size: 14, color: AppColors.error),
+                        ),
+                      ),
+                    ]),
+                    const SizedBox(height: 8),
+                    Row(children: [
+                      Expanded(child: _trackedActionBtn(
+                        icon: Icons.map,
+                        label: 'Ver no Mapa',
+                        color: AppColors.primary,
+                        enabled: hasLoc,
+                        onTap: () => _viewOnMap(item),
+                      )),
+                      const SizedBox(width: 6),
+                      Expanded(child: _trackedActionBtn(
+                        icon: Icons.navigation,
+                        label: 'Rastrear',
+                        color: color,
+                        enabled: hasLoc,
+                        onTap: () => _trackLive(item),
+                      )),
+                      const SizedBox(width: 6),
+                      Expanded(child: _trackedActionBtn(
+                        icon: Icons.share_location,
+                        label: 'Atualizar GPS',
+                        color: AppColors.cyan,
+                        enabled: true,
+                        onTap: () => _pushLocation(item),
+                      )),
+                    ]),
+                  ]),
+                );
+              }),
               _miniBtn('+ Adicionar', _showAddTracked),
             ],
             const SizedBox(height: 12),
@@ -349,6 +403,64 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   IconData _typeIcon(String type) {
     switch (type) { case 'pet': return Icons.pets; case 'vehicle': return Icons.directions_car; case 'tag': return Icons.sell; case 'person': return Icons.person_pin; default: return Icons.location_on; }
+  }
+
+  Color _typeColor(String type) {
+    switch (type) { case 'pet': return const Color(0xFFFFB800); case 'vehicle': return const Color(0xFF00D4FF); case 'tag': return const Color(0xFF7B61FF); case 'person': return const Color(0xFFFF3B7A); default: return AppColors.secondary; }
+  }
+
+  Widget _trackedActionBtn({required IconData icon, required String label, required Color color, required bool enabled, required VoidCallback onTap}) {
+    return Material(
+      color: enabled ? color.withAlpha(15) : Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: enabled ? onTap : null,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: enabled ? color.withAlpha(50) : AppColors.border)),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, size: 14, color: enabled ? color : AppColors.textDisabled),
+            const SizedBox(height: 2),
+            Text(label, style: TextStyle(color: enabled ? color : AppColors.textDisabled, fontSize: 7, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  void _viewOnMap(item) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('📍 Showing ${item.name} on map'), duration: const Duration(seconds: 1)));
+  }
+
+  void _trackLive(item) {
+    ref.read(trackingProvider.notifier).startTracking(item.id);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('🔴 Live tracking ${item.name}'), duration: const Duration(seconds: 2)));
+  }
+
+  Future<void> _pushLocation(item) async {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('📡 Updating GPS location...'), duration: Duration(seconds: 1)));
+    await ref.read(trackingProvider.notifier).pushDeviceLocationToItem(item.id);
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✓ Location updated'), duration: Duration(seconds: 1)));
+  }
+
+  void _confirmDelete(item) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Remover Item', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        content: Text('Remover "${item.name}" dos itens rastreados?', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () { Navigator.pop(ctx); ref.read(trackingProvider.notifier).remove(item.id); },
+            child: const Text('Remover', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _callPhone(String phone) {

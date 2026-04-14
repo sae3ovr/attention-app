@@ -29,6 +29,13 @@ const _tileUrls = [
   'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
 ];
 
+const _trackedItemColors = <String, Color>{
+  'pet': Color(0xFFFFB800),
+  'vehicle': Color(0xFF00D4FF),
+  'tag': Color(0xFF7B61FF),
+  'person': Color(0xFFFF3B7A),
+};
+
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
   @override
@@ -43,18 +50,23 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
   Timer? _locationTimer;
   int _tileUrlIndex = 0;
 
-  // Incident interaction state
   Incident? _selectedIncident;
   Incident? _tooltipIncident;
   Offset? _tooltipOffset;
   String? _highlightedId;
 
+  bool _showTrackedPanel = false;
+  TrackedItem? _selectedTracked;
+  bool _isNavigatingToItem = false;
+
   late AnimationController _pulseCtrl;
+  late AnimationController _trackPulseCtrl;
 
   @override
   void initState() {
     super.initState();
     _pulseCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
+    _trackPulseCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat(reverse: true);
     _initLocation();
     Future.microtask(() {
       ref.read(incidentsProvider.notifier).load();
@@ -85,6 +97,7 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
   void dispose() {
     _locationTimer?.cancel();
     _pulseCtrl.dispose();
+    _trackPulseCtrl.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -100,6 +113,7 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
       _selectedIncident = inc;
       _tooltipIncident = null;
       _highlightedId = inc.id;
+      _selectedTracked = null;
     });
     _mapController.move(LatLng(inc.latitude, inc.longitude), _mapController.camera.zoom.clamp(14, 19));
     Future.delayed(const Duration(seconds: 3), () {
@@ -107,7 +121,7 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
     });
   }
 
-  void _clearSelection() => setState(() { _selectedIncident = null; _tooltipIncident = null; _highlightedId = null; });
+  void _clearSelection() => setState(() { _selectedIncident = null; _tooltipIncident = null; _highlightedId = null; _selectedTracked = null; });
 
   void _showTooltip(Incident inc, Offset globalPos) {
     setState(() { _tooltipIncident = inc; _tooltipOffset = globalPos; });
@@ -116,15 +130,47 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
     });
   }
 
+  void _selectTrackedItem(TrackedItem item) {
+    setState(() {
+      _selectedTracked = item;
+      _selectedIncident = null;
+      _tooltipIncident = null;
+    });
+    if (item.hasLocation) {
+      _mapController.move(LatLng(item.latitude!, item.longitude!), _mapController.camera.zoom.clamp(15, 18));
+    }
+  }
+
+  void _startNavigationToItem(TrackedItem item) {
+    if (!item.hasLocation) return;
+    ref.read(trackingProvider.notifier).startTracking(item.id);
+    setState(() {
+      _isNavigatingToItem = true;
+      _selectedTracked = item;
+      _showTrackedPanel = false;
+    });
+    _mapController.move(LatLng(item.latitude!, item.longitude!), 16);
+  }
+
+  void _stopNavigation() {
+    ref.read(trackingProvider.notifier).stopTracking();
+    setState(() => _isNavigatingToItem = false);
+  }
+
+  Color _trackedColor(String type) => _trackedItemColors[type] ?? AppColors.secondary;
+
   @override
   Widget build(BuildContext context) {
     final incidents = ref.watch(incidentsProvider).incidents;
-    final tracked = ref.watch(trackingProvider).items;
+    final trackingState = ref.watch(trackingProvider);
+    final tracked = trackingState.items;
+    final activeItem = trackingState.activeItem;
     final pad = MediaQuery.of(context).padding;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? AppColors.background : AppColors.lightBackground;
     final cardBg = isDark ? AppColors.background.withAlpha(220) : Colors.white.withAlpha(230);
     final screenSize = MediaQuery.of(context).size;
+    final trackedWithLocation = tracked.where((t) => t.hasLocation).toList();
 
     return Stack(
       children: [
@@ -145,6 +191,16 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
                 CircleMarker(point: _userLocation, radius: _scanRadius,
                   color: AppColors.primary.withAlpha(15), borderColor: AppColors.primary.withAlpha(128),
                   borderStrokeWidth: 2, useRadiusInMeter: true),
+              ]),
+
+            // Navigation line from user to active tracked item
+            if (_isNavigatingToItem && activeItem != null && activeItem.hasLocation)
+              PolylineLayer(polylines: [
+                Polyline(
+                  points: [_userLocation, LatLng(activeItem.latitude!, activeItem.longitude!)],
+                  color: _trackedColor(activeItem.itemType).withAlpha(180),
+                  strokeWidth: 3, pattern: const StrokePattern.dotted(),
+                ),
               ]),
 
             // Incident markers
@@ -190,11 +246,39 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
               );
             }).toList()),
 
-            // Tracked items
-            MarkerLayer(markers: tracked.where((t) => t.latitude != null && t.longitude != null).map((item) {
-              return Marker(point: LatLng(item.latitude!, item.longitude!), width: 34, height: 34,
-                child: Container(decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.secondary.withAlpha(38), border: Border.all(color: AppColors.secondary, width: 1.5)),
-                  child: Icon(_trackedIcon(item.itemType), size: 16, color: AppColors.secondary)));
+            // Tracked items with enhanced markers
+            MarkerLayer(markers: trackedWithLocation.map((item) {
+              final color = _trackedColor(item.itemType);
+              final isSelected = _selectedTracked?.id == item.id;
+              final isActiveNav = activeItem?.id == item.id;
+              return Marker(
+                point: LatLng(item.latitude!, item.longitude!), width: isSelected ? 60 : 44, height: isSelected ? 68 : 52,
+                child: GestureDetector(
+                  onTap: () => _selectTrackedItem(item),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    _TrackedMarkerDot(
+                      color: color,
+                      icon: _trackedIcon(item.itemType),
+                      isSelected: isSelected,
+                      isActiveNav: isActiveNav,
+                      pulseCtrl: _trackPulseCtrl,
+                    ),
+                    const SizedBox(height: 2),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: bgColor.withAlpha(230),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: color.withAlpha(100), width: 0.5),
+                      ),
+                      child: Text(
+                        item.name.length > 8 ? '${item.name.substring(0, 8)}..' : item.name,
+                        style: TextStyle(fontSize: 7, fontWeight: FontWeight.w700, color: color, letterSpacing: 0.3),
+                      ),
+                    ),
+                  ]),
+                ),
+              );
             }).toList()),
 
             // User dot
@@ -216,28 +300,199 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
                 Text('ALERT.IO', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 2, fontFamily: 'monospace')),
               ])),
             const Spacer(),
+            if (tracked.isNotEmpty)
+              _MapButton(
+                icon: Icons.track_changes,
+                label: '${trackedWithLocation.length}',
+                color: AppColors.secondary,
+                active: _showTrackedPanel,
+                onTap: () => setState(() { _showTrackedPanel = !_showTrackedPanel; if (_showTrackedPanel) _selectedIncident = null; }),
+                cardBg: cardBg, isDark: isDark,
+              ),
+            if (tracked.isNotEmpty) const SizedBox(width: 6),
             _MapButton(icon: Icons.layers, onTap: _cycleTileSource, cardBg: cardBg, isDark: isDark),
             const SizedBox(width: 6),
             _MapButton(icon: Icons.my_location, onTap: () => _mapController.move(_userLocation, 16), cardBg: cardBg, isDark: isDark),
           ])),
 
-        // Bottom action bar
-        Positioned(bottom: pad.bottom + 12, left: 12, right: 12,
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            _MapButton(icon: Icons.add, label: 'Report', color: AppColors.warning, onTap: () => _showReportSheet(), cardBg: cardBg, isDark: isDark),
-            const SizedBox(width: 8),
-            _MapButton(icon: Icons.radar, label: 'Scan', color: AppColors.primary, active: _scanning, onTap: () => setState(() => _scanning = !_scanning), cardBg: cardBg, isDark: isDark),
-            const SizedBox(width: 8),
-            _MapButton(icon: Icons.near_me_outlined, label: 'Nearby', onTap: () => _showNearby(incidents), cardBg: cardBg, isDark: isDark),
-          ])),
+        // Tracked items panel
+        if (_showTrackedPanel)
+          Positioned(
+            top: pad.top + 60, right: 12,
+            child: _TrackedItemsPanel(
+              items: tracked,
+              selectedId: _selectedTracked?.id,
+              activeNavId: activeItem?.id,
+              onSelect: _selectTrackedItem,
+              onNavigate: _startNavigationToItem,
+              onClose: () => setState(() => _showTrackedPanel = false),
+              isDark: isDark,
+              userLocation: _userLocation,
+            ),
+          ),
 
-        // Incident detail popup (bottom card)
+        // Navigation HUD overlay
+        if (_isNavigatingToItem && activeItem != null)
+          _buildNavigationHud(activeItem, pad, cardBg, isDark),
+
+        // Bottom action bar
+        if (!_isNavigatingToItem)
+          Positioned(bottom: pad.bottom + 12, left: 12, right: 12,
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              _MapButton(icon: Icons.add, label: 'Report', color: AppColors.warning, onTap: () => _showReportSheet(), cardBg: cardBg, isDark: isDark),
+              const SizedBox(width: 8),
+              _MapButton(icon: Icons.radar, label: 'Scan', color: AppColors.primary, active: _scanning, onTap: () => setState(() => _scanning = !_scanning), cardBg: cardBg, isDark: isDark),
+              const SizedBox(width: 8),
+              _MapButton(icon: Icons.near_me_outlined, label: 'Nearby', onTap: () => _showNearby(incidents), cardBg: cardBg, isDark: isDark),
+            ])),
+
+        // Selected tracked item popup
+        if (_selectedTracked != null && !_isNavigatingToItem) _buildTrackedItemPopup(pad),
+
+        // Incident detail popup
         if (_selectedIncident != null) _buildIncidentPopup(pad),
 
-        // Floating tooltip on long-press (suppressed when incident selected)
+        // Floating tooltip on long-press
         if (_tooltipIncident != null && _tooltipOffset != null && _selectedIncident == null)
           _buildFloatingTooltip(screenSize),
       ],
+    );
+  }
+
+  // --- Navigation HUD ---
+  Widget _buildNavigationHud(TrackedItem item, EdgeInsets pad, Color cardBg, bool isDark) {
+    final color = _trackedColor(item.itemType);
+    final dist = item.hasLocation ? _distance(item.latitude!, item.longitude!) : 0.0;
+    final distStr = dist < 1 ? '${(dist * 1000).round()}m' : '${dist.toStringAsFixed(1)}km';
+
+    return Positioned(
+      bottom: pad.bottom + 12, left: 12, right: 12,
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        glowColor: color,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Row(children: [
+            _AnimatedTrackIcon(color: color, icon: _trackedIcon(item.itemType), ctrl: _trackPulseCtrl),
+            const SizedBox(width: 10),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+              Row(children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(color: color.withAlpha(30), borderRadius: BorderRadius.circular(4)),
+                  child: Text('NAVIGATING', style: TextStyle(color: color, fontSize: 8, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                ),
+                const SizedBox(width: 6),
+                Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.success)),
+              ]),
+              const SizedBox(height: 4),
+              Text(item.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+            ])),
+            const SizedBox(width: 8),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text(distStr, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w800, fontFamily: 'monospace')),
+              Text(item.lastSeenLabel, style: const TextStyle(color: AppColors.textTertiary, fontSize: 9)),
+            ]),
+          ]),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(child: Material(
+              color: color.withAlpha(25),
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  if (item.hasLocation) _mapController.move(LatLng(item.latitude!, item.longitude!), 17);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: color.withAlpha(60))),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.center_focus_strong, size: 14, color: color),
+                    const SizedBox(width: 6),
+                    Text('CENTER', style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w800)),
+                  ]),
+                ),
+              ),
+            )),
+            const SizedBox(width: 8),
+            Expanded(child: Material(
+              color: AppColors.error.withAlpha(25),
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: _stopNavigation,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.error.withAlpha(60))),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    const Icon(Icons.close, size: 14, color: AppColors.error),
+                    const SizedBox(width: 6),
+                    const Text('STOP', style: TextStyle(color: AppColors.error, fontSize: 10, fontWeight: FontWeight.w800)),
+                  ]),
+                ),
+              ),
+            )),
+          ]),
+        ]),
+      ),
+    );
+  }
+
+  // --- Tracked item popup ---
+  Widget _buildTrackedItemPopup(EdgeInsets pad) {
+    final item = _selectedTracked!;
+    final color = _trackedColor(item.itemType);
+    final dist = item.hasLocation ? _distance(item.latitude!, item.longitude!) : null;
+    final distStr = dist != null ? (dist < 1 ? '${(dist * 1000).round()}m' : '${dist.toStringAsFixed(1)}km') : '—';
+
+    return Positioned(
+      bottom: pad.bottom + 72, left: 12, right: 12,
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        glowColor: color,
+        borderRadius: BorderRadius.circular(14),
+        child: Row(children: [
+          Container(
+            width: 36, height: 36,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color.withAlpha(38), border: Border.all(color: color, width: 1.5)),
+            child: Icon(_trackedIcon(item.itemType), size: 18, color: color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+            Text(item.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 2),
+            Row(children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(color: color.withAlpha(25), borderRadius: BorderRadius.circular(3)),
+                child: Text(item.itemType.toUpperCase(), style: TextStyle(color: color, fontSize: 7, fontWeight: FontWeight.w800, letterSpacing: 1)),
+              ),
+              const SizedBox(width: 6),
+              Text(item.lastSeenLabel, style: const TextStyle(color: AppColors.textTertiary, fontSize: 9)),
+            ]),
+          ])),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Text(distStr, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w800, fontFamily: 'monospace')),
+          ]),
+          const SizedBox(width: 8),
+          if (item.hasLocation)
+            Material(color: Colors.transparent, child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => _startNavigationToItem(item),
+              child: Container(
+                width: 32, height: 32,
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: color.withAlpha(30), border: Border.all(color: color.withAlpha(80))),
+                child: Icon(Icons.navigation, size: 16, color: color),
+              ),
+            )),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () => setState(() => _selectedTracked = null),
+            child: const Padding(padding: EdgeInsets.all(4), child: Icon(Icons.close, size: 14, color: AppColors.textTertiary)),
+          ),
+        ]),
+      ),
     );
   }
 
@@ -415,7 +670,7 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
     );
   }
 
-  // --- Full detail sheet (standalone, no popup overlap) ---
+  // --- Full detail sheet ---
   void _showIncidentDetail(Incident inc) {
     final color = AppColors.category(inc.category);
     showModalBottomSheet(context: context, backgroundColor: Theme.of(context).cardTheme.color, isScrollControlled: true,
@@ -489,6 +744,187 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
   }
 }
 
+// --- Tracked items side panel ---
+class _TrackedItemsPanel extends StatelessWidget {
+  final List<TrackedItem> items;
+  final String? selectedId;
+  final String? activeNavId;
+  final void Function(TrackedItem) onSelect;
+  final void Function(TrackedItem) onNavigate;
+  final VoidCallback onClose;
+  final bool isDark;
+  final LatLng userLocation;
+
+  const _TrackedItemsPanel({
+    required this.items, this.selectedId, this.activeNavId,
+    required this.onSelect, required this.onNavigate, required this.onClose,
+    required this.isDark, required this.userLocation,
+  });
+
+  double _dist(TrackedItem item) {
+    if (!item.hasLocation) return double.infinity;
+    return const Distance().as(LengthUnit.Kilometer, userLocation, LatLng(item.latitude!, item.longitude!));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isDark ? AppColors.background.withAlpha(240) : Colors.white.withAlpha(245);
+    return Container(
+      width: 220,
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.secondary.withAlpha(50)),
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(60), blurRadius: 16)],
+      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 8, 6),
+          child: Row(children: [
+            Icon(Icons.track_changes, size: 14, color: AppColors.secondary),
+            const SizedBox(width: 6),
+            const Expanded(child: Text('TRACKED ITEMS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1))),
+            GestureDetector(onTap: onClose, child: const Icon(Icons.close, size: 16, color: AppColors.textTertiary)),
+          ]),
+        ),
+        const Divider(height: 1, color: AppColors.border),
+        Flexible(
+          child: ListView.builder(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final item = items[i];
+              final color = _trackedItemColors[item.itemType] ?? AppColors.secondary;
+              final isSelected = selectedId == item.id;
+              final isNav = activeNavId == item.id;
+              final dist = _dist(item);
+              final distStr = dist == double.infinity ? 'No GPS' : (dist < 1 ? '${(dist * 1000).round()}m' : '${dist.toStringAsFixed(1)}km');
+
+              return Material(
+                color: isSelected ? color.withAlpha(20) : Colors.transparent,
+                child: InkWell(
+                  onTap: () => onSelect(item),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: isSelected ? BoxDecoration(border: Border(left: BorderSide(color: color, width: 3))) : null,
+                    child: Row(children: [
+                      Container(
+                        width: 28, height: 28,
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: color.withAlpha(25), border: Border.all(color: color.withAlpha(80))),
+                        child: Icon(_iconForType(item.itemType), size: 14, color: color),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(item.name, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Row(children: [
+                          if (isNav) ...[
+                            Container(width: 5, height: 5, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.success)),
+                            const SizedBox(width: 3),
+                          ],
+                          Text(isNav ? 'Tracking' : distStr, style: TextStyle(color: isNav ? AppColors.success : AppColors.textTertiary, fontSize: 8, fontWeight: isNav ? FontWeight.w700 : FontWeight.w400)),
+                        ]),
+                      ])),
+                      if (item.hasLocation)
+                        GestureDetector(
+                          onTap: () => onNavigate(item),
+                          child: Container(
+                            width: 24, height: 24,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(6), color: color.withAlpha(20), border: Border.all(color: color.withAlpha(50))),
+                            child: Icon(Icons.navigation, size: 12, color: color),
+                          ),
+                        ),
+                    ]),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ]),
+    );
+  }
+
+  IconData _iconForType(String type) {
+    switch (type) { case 'pet': return Icons.pets; case 'vehicle': return Icons.directions_car; case 'tag': return Icons.sell; case 'person': return Icons.person_pin; default: return Icons.location_on; }
+  }
+}
+
+// --- Animated tracked marker on the map ---
+class _TrackedMarkerDot extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final bool isSelected;
+  final bool isActiveNav;
+  final AnimationController pulseCtrl;
+
+  const _TrackedMarkerDot({required this.color, required this.icon, required this.isSelected, required this.isActiveNav, required this.pulseCtrl});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = isSelected ? 40.0 : 32.0;
+    if (isActiveNav) {
+      return _AnimBuilder2(
+        listenable: pulseCtrl,
+        builder: (_, __) {
+          final v = pulseCtrl.value;
+          return Container(
+            width: size + v * 8, height: size + v * 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withAlpha(30 + (v * 20).round()),
+              border: Border.all(color: color, width: 2.5),
+              boxShadow: [BoxShadow(color: color.withAlpha(60 + (v * 60).round()), blurRadius: 12 + v * 8, spreadRadius: v * 3)],
+            ),
+            child: Icon(icon, size: isSelected ? 20 : 16, color: color),
+          );
+        },
+      );
+    }
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      width: size, height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withAlpha(isSelected ? 50 : 30),
+        border: Border.all(color: color, width: isSelected ? 2.5 : 1.5),
+        boxShadow: isSelected
+          ? [BoxShadow(color: color.withAlpha(80), blurRadius: 12, spreadRadius: 2)]
+          : [BoxShadow(color: Colors.black.withAlpha(40), blurRadius: 4)],
+      ),
+      child: Icon(icon, size: isSelected ? 20 : 16, color: color),
+    );
+  }
+}
+
+class _AnimatedTrackIcon extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final AnimationController ctrl;
+  const _AnimatedTrackIcon({required this.color, required this.icon, required this.ctrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return _AnimBuilder2(
+      listenable: ctrl,
+      builder: (_, __) {
+        final v = ctrl.value;
+        return Container(
+          width: 36, height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withAlpha(25 + (v * 15).round()),
+            border: Border.all(color: color, width: 2),
+            boxShadow: [BoxShadow(color: color.withAlpha(40 + (v * 40).round()), blurRadius: 8 + v * 6)],
+          ),
+          child: Icon(icon, size: 18, color: color),
+        );
+      },
+    );
+  }
+}
+
 // --- Reusable widgets ---
 
 class _MapButton extends StatelessWidget {
@@ -544,7 +980,7 @@ class _ThumbBtnState extends State<_ThumbBtn> with SingleTickerProviderStateMixi
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: _handleTap,
-        child: AnimatedBuilder2(
+        child: _AnimBuilder2(
           listenable: _anim,
           builder: (_, __) {
             final scale = 1.0 + (_anim.value < 0.5 ? _anim.value * 0.4 : (1 - _anim.value) * 0.4);
@@ -571,9 +1007,9 @@ class _ThumbBtnState extends State<_ThumbBtn> with SingleTickerProviderStateMixi
   }
 }
 
-class AnimatedBuilder2 extends AnimatedWidget {
+class _AnimBuilder2 extends AnimatedWidget {
   final Widget Function(BuildContext, Widget?) builder;
-  const AnimatedBuilder2({super.key, required super.listenable, required this.builder});
+  const _AnimBuilder2({required super.listenable, required this.builder});
   @override
   Widget build(BuildContext context) => builder(context, null);
 }
