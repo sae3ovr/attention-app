@@ -1,0 +1,13 @@
+{
+  "name": "alertio-tile-proxy",
+  "version": "1.0.0",
+  "description": "Map tile proxy for Alert.io dev environment",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true
+}

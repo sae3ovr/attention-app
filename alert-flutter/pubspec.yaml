@@ -1,0 +1,26 @@
+name: alert_flutter
+description: Alert.io — Community Safety Platform
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: '>=3.16.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  geolocator: ^12.0.0
+  dio: ^5.7.0
+  flutter_riverpod: ^2.6.1
+  flutter_secure_storage: ^9.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

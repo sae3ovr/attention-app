@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"/>
+<title>Alert.io — From Alert to Action</title>
+<meta name="description" content="Plataforma de gestão de incidentes de segurança em tempo real. One platform. Zero blind spots."/>
+<meta property="og:title" content="Alert.io — From Alert to Action"/>
+<meta property="og:description" content="Plataforma de gestão de incidentes de segurança em tempo real."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://alert.io"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Alert.io — From Alert to Action"/>
+<meta name="twitter:description" content="Plataforma de gestão de incidentes de segurança em tempo real."/>
+<link rel="canonical" href="https://alert.io"/>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"/>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" defer></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0D1117;--bg2:#161B22;--bg3:#1C2333;
+  --green:#00FF88;--green-dim:rgba(0,255,136,0.12);--green-border:rgba(0,255,136,0.25);
+  --red:#FF4757;--orange:#FFA500;--yellow:#FFD700;--blue:#58A6FF;--purple:#BC8CFF;
+  --text:#E6EDF3;--muted:#8B949E;--border:rgba(255,255,255,0.08);
+}
+html{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-width:0;overflow-x:hidden;position:relative;z-index:1}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 40px}
+
+/* ─── SCROLL REVEAL (enhanced) ─── */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-scale{opacity:0;transform:scale(.88);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+.reveal-scale.visible{opacity:1;transform:scale(1)}
+.reveal-left{opacity:0;transform:translateX(-50px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(50px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+.reveal-fade{opacity:0;transition:opacity 1s cubic-bezier(.16,1,.3,1)}
+.reveal-fade.visible{opacity:1}
+.stagger-children .reveal:nth-child(1),.stagger-children .reveal-scale:nth-child(1){transition-delay:.05s}
+.stagger-children .reveal:nth-child(2),.stagger-children .reveal-scale:nth-child(2){transition-delay:.1s}
+.stagger-children .reveal:nth-child(3),.stagger-children .reveal-scale:nth-child(3){transition-delay:.15s}
+.stagger-children .reveal:nth-child(4),.stagger-children .reveal-scale:nth-child(4){transition-delay:.2s}
+.stagger-children .reveal:nth-child(5),.stagger-children .reveal-scale:nth-child(5){transition-delay:.25s}
+.stagger-children .reveal:nth-child(6),.stagger-children .reveal-scale:nth-child(6){transition-delay:.3s}
+.stagger-children .reveal:nth-child(7),.stagger-children .reveal-scale:nth-child(7){transition-delay:.35s}
+.stagger-children .reveal:nth-child(8),.stagger-children .reveal-scale:nth-child(8){transition-delay:.4s}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;border-bottom:0.5px solid transparent;transition:background .4s,border-color .4s,box-shadow .4s}
+section,.wrap,footer{position:relative;z-index:1}
+nav.scrolled{background:rgba(13,17,23,0.96);border-bottom-color:var(--border);box-shadow:0 1px 20px rgba(0,0,0,0.3)}
+.nav-inner{max-width:1120px;margin:0 auto;padding:0 40px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;letter-spacing:-1px;cursor:pointer}
+.nav-logo-icon{width:28px;height:28px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:900;font-size:16px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.nav-logo:hover .nav-logo-icon{transform:rotate(-8deg) scale(1.1)}
+.nav-logo .io{color:var(--green)}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links .btn-primary{height:32px;padding:0 14px;font-size:10px}
+.nav-links a{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);transition:color .25s;position:relative;cursor:pointer}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1.5px;background:var(--green);transition:width .3s cubic-bezier(.16,1,.3,1)}
+.nav-links a:hover{color:var(--text)}
+.nav-links a:hover::after{width:100%}
+.nav-links a.active{color:var(--green)}
+.nav-links a.active::after{width:100%}
+
+/* ─── BUTTONS ─── */
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;background:var(--green);color:var(--bg);font-family:'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:1px;padding:8px 18px;border:none;border-radius:6px;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;position:relative;overflow:hidden;height:42px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 20px rgba(0,255,136,0.25)}
+.btn-primary:active{transform:translateY(0) scale(.97)}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--green);border:0.5px solid var(--green-border);font-family:'Courier New',monospace;font-size:12px;font-weight:400;letter-spacing:1px;padding:8px 18px;border-radius:6px;cursor:pointer;transition:border-color .25s,color .25s,background .25s,transform .2s;height:42px}
+.btn-ghost:hover{border-color:var(--green);color:var(--text);background:rgba(0,255,136,0.06);transform:translateY(-1px)}
+.btn-ghost:active{transform:translateY(0) scale(.97)}
+
+/* ─── LIVE DEMO BUTTON ─── */
+.btn-livedemo{display:inline-flex;align-items:center;gap:10px;background:rgba(255,45,45,0.08);color:#FF6B6B;border:1px solid rgba(255,45,45,0.25);font-family:'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:1.5px;padding:12px 28px;border-radius:8px;cursor:pointer;transition:all .35s cubic-bezier(.25,.8,.25,1);position:relative;overflow:hidden}
+.btn-livedemo::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,45,45,0.06),transparent);transform:translateX(-100%);transition:transform .6s ease}
+.btn-livedemo:hover{background:rgba(255,45,45,0.14);border-color:rgba(255,45,45,0.45);color:#FF8585;transform:translateY(-2px);box-shadow:0 4px 24px rgba(255,45,45,0.15),0 0 0 1px rgba(255,45,45,0.08)}
+.btn-livedemo:hover::before{transform:translateX(100%)}
+.btn-livedemo:active{transform:translateY(0) scale(.97)}
+.btn-livedemo-dot{width:8px;height:8px;border-radius:50%;background:#FF2D2D;animation:pulse 1.5s ease-in-out infinite;box-shadow:0 0 8px rgba(255,45,45,0.5)}
+.btn-livedemo-arrow{transition:transform .3s ease;font-size:14px}
+.btn-livedemo:hover .btn-livedemo-arrow{transform:translateX(4px)}
+.btn-livedemo-sm{padding:10px 20px;font-size:11px}
+@media(max-width:600px){.btn-livedemo{padding:10px 20px;font-size:11px}}
+
+/* ─── HERO ─── */
+.hero{padding:140px 0 80px;text-align:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hero-bg canvas{width:100%;height:100%}
+.hero>.wrap{position:relative;z-index:2}
+
+/* Full-page animated grid background */
+.page-grid{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:.04}
+.page-grid::before{content:'';position:absolute;inset:-50% -25%;width:150%;height:200%;
+  background:repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(0,255,136,0.3) 59px,rgba(0,255,136,0.3) 60px),
+             repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(0,255,136,0.3) 59px,rgba(0,255,136,0.3) 60px);
+  transform:perspective(600px) rotateX(55deg);transform-origin:50% 0%;
+  animation:grid-scroll 20s linear infinite}
+@keyframes grid-scroll{from{transform:perspective(600px) rotateX(55deg) translateY(0)}to{transform:perspective(600px) rotateX(55deg) translateY(60px)}}
+
+/* Full-page particle canvas */
+.page-particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+.page-particles canvas{width:100%;height:100%}
+
+
+/* Hero mouse glow */
+.hero-glow{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .5s}
+.hero:hover .hero-glow{opacity:1}
+.hero-glow::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,255,136,0.10) 0%,rgba(0,255,136,0.04) 30%,transparent 65%);
+  transform:translate(calc(var(--hx,50%) - 350px),calc(var(--hy,50%) - 350px));pointer-events:none;transition:transform .04s linear}
+
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:0.5px solid var(--green-border);border-radius:20px;background:var(--green-dim);font-size:12px;color:var(--green);margin-bottom:32px;animation:badge-enter .8s cubic-bezier(.16,1,.3,1) both}
+@keyframes badge-enter{from{opacity:0;transform:translateY(-12px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:52px;font-weight:700;line-height:1.15;letter-spacing:-2px;margin-bottom:20px;animation:h1-enter 1s cubic-bezier(.16,1,.3,1) .15s both}
+@keyframes h1-enter{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.hero h1 .accent{color:var(--green);position:relative;animation:accent-glow 4s ease-in-out infinite}
+@keyframes accent-glow{0%,100%{text-shadow:0 0 8px rgba(0,255,136,0.15),0 0 32px rgba(0,255,136,0.05)}50%{text-shadow:0 0 16px rgba(0,255,136,0.3),0 0 48px rgba(0,255,136,0.1)}}
+.hero h1 .typed-cursor{display:inline-block;width:3px;height:.85em;background:var(--green);margin-left:2px;animation:blink-cursor .7s step-end infinite;vertical-align:text-bottom}
+@keyframes blink-cursor{0%,100%{opacity:1}50%{opacity:0}}
+.hero p.sub{font-family:system-ui,-apple-system,sans-serif;font-size:17px;color:var(--muted);max-width:520px;margin:0 auto 40px;line-height:1.6;animation:h1-enter 1s cubic-bezier(.16,1,.3,1) .35s both}
+.hero-actions{display:flex;gap:14px;justify-content:center;align-items:center;animation:h1-enter 1s cubic-bezier(.16,1,.3,1) .5s both}
+
+/* Scroll-down chevron */
+.scroll-chevron{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.5;animation:bounce-chevron 2.5s ease-in-out infinite;transition:opacity .4s;cursor:pointer}
+.scroll-chevron.hide{opacity:0;pointer-events:none}
+.scroll-chevron span{display:block;width:20px;height:20px;border-right:1.5px solid var(--green);border-bottom:1.5px solid var(--green);transform:rotate(45deg)}
+.scroll-chevron span:nth-child(2){opacity:.5;margin-top:-10px}
+@keyframes bounce-chevron{0%,100%{transform:translateX(-50%) translateY(0);opacity:.5}50%{transform:translateX(-50%) translateY(8px);opacity:.7}}
+
+/* ─── AUTH SECTION — compact modern glassmorphic ─── */
+.auth-section{padding:0 0 80px}
+.auth-card{max-width:320px;margin:0 auto;background:rgba(22,27,34,0.6);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:0.5px solid rgba(255,255,255,0.06);border-radius:14px;padding:20px 22px;transition:border-color .4s,box-shadow .4s,transform .4s}
+.auth-card:hover{border-color:rgba(0,255,136,0.15);box-shadow:0 8px 40px rgba(0,255,136,0.06),0 0 0 1px rgba(0,255,136,0.05);transform:translateY(-2px)}
+.auth-card .auth-header{text-align:center;margin-bottom:14px}
+.auth-card .auth-header h2{font-size:15px;font-weight:700;letter-spacing:-0.3px;margin-bottom:3px}
+.auth-card .auth-header p{font-size:8px;color:var(--muted);letter-spacing:2px}
+.auth-card .auth-header svg{animation:radar-spin 12s linear infinite}
+@keyframes radar-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.auth-tabs{display:flex;border-bottom:0.5px solid var(--border);margin-bottom:14px;gap:0}
+.auth-tab{flex:1;padding:8px 0;text-align:center;font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:color .25s,border-color .3s,background .2s;border-radius:0;position:relative}
+.auth-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.auth-tab:hover{color:var(--text);background:rgba(255,255,255,0.02)}
+.auth-tab:first-child{border-radius:6px 0 0 0}
+.auth-tab:last-child{border-radius:0 6px 0 0}
+.form-group{margin-bottom:10px;position:relative}
+.form-group label{display:block;font-size:7px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:3px;transition:color .25s,transform .25s,letter-spacing .25s}
+.form-group:focus-within label{color:var(--green);letter-spacing:2.5px}
+.form-group input{width:100%;height:32px;background:rgba(28,35,51,0.5);border:0.5px solid var(--border);border-left:2px solid transparent;border-radius:6px;padding:0 10px;color:var(--text);font-family:'Courier New',monospace;font-size:11px;outline:none;transition:border-color .25s,box-shadow .3s,background .3s,border-left-color .3s}
+.form-group input:focus{border-color:var(--green-border);border-left-color:var(--green);box-shadow:0 0 0 3px rgba(0,255,136,0.06),0 0 12px rgba(0,255,136,0.04);background:rgba(28,35,51,0.8)}
+.form-group input::placeholder{color:rgba(138,148,158,0.35);font-size:10px}
+.form-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.form-check{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);cursor:pointer}
+.form-check input[type=checkbox]{appearance:none;width:11px;height:11px;border:0.5px solid var(--border);border-radius:3px;background:rgba(28,35,51,0.5);cursor:pointer;position:relative;transition:background .2s,border-color .2s}
+.form-check input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}
+.form-check input[type=checkbox]:checked::after{content:'✓';position:absolute;top:-1px;left:1px;font-size:8px;color:var(--bg);font-weight:900}
+.form-forgot{font-size:9px;color:var(--green);cursor:pointer;transition:opacity .2s}
+.form-forgot:hover{opacity:.7}
+.auth-submit{width:100%;height:36px;display:flex;align-items:center;justify-content:center;background:var(--green);color:var(--bg);font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;border:none;border-radius:6px;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;position:relative;overflow:hidden}
+.auth-submit:hover{transform:translateY(-2px) scale(1.01);box-shadow:0 4px 24px rgba(0,255,136,0.25)}
+.auth-submit:active{transform:scale(.97)}
+.auth-submit .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.3);transform:scale(0);animation:ripple-fx .6s ease-out forwards}
+@keyframes ripple-fx{to{transform:scale(4);opacity:0}}
+.auth-divider{display:flex;align-items:center;gap:8px;margin:10px 0}
+.auth-divider span{font-size:8px;text-transform:uppercase;letter-spacing:2px;color:var(--muted)}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:0.5px;background:var(--border)}
+.social-buttons{display:flex;gap:6px;align-items:stretch}
+.social-btn{flex:1;height:30px;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(28,35,51,0.4);border:0.5px solid var(--border);border-radius:6px;font-family:'Courier New',monospace;font-size:9px;color:var(--muted);cursor:pointer;transition:border-color .25s,color .25s,transform .2s,background .25s,box-shadow .3s}
+.social-btn:hover{border-color:rgba(255,255,255,0.15);color:var(--text);transform:translateY(-1px);background:rgba(28,35,51,0.7);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.social-btn:active{transform:translateY(0) scale(.97)}
+.auth-footer{text-align:center;margin-top:10px;font-size:9px;color:var(--muted)}
+.auth-footer a{color:var(--green);cursor:pointer;transition:opacity .2s}
+.auth-footer a:hover{opacity:.7}
+
+/* Auth success state */
+.auth-success{display:none;text-align:center;padding:14px 0}
+.auth-success.show{display:block;animation:h1-enter .5s both}
+.auth-success .check{width:44px;height:44px;border-radius:50%;background:var(--green-dim);border:1.5px solid var(--green-border);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px}
+.auth-success h3{font-size:14px;font-weight:700;margin-bottom:4px}
+.auth-success p{font-size:11px;color:var(--muted);margin-bottom:14px;font-family:system-ui,sans-serif}
+
+/* ─── STATS ─── */
+.stats{border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);padding:36px 0}
+.stats-grid{display:flex}
+.stat-item{flex:1;text-align:center;border-right:0.5px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:32px;font-weight:700;letter-spacing:-1px}
+.stat-num .unit{font-size:14px;color:var(--green);font-weight:400}
+.stat-label{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:1px}
+
+/* ─── SECTION TITLES ─── */
+.section-title{font-size:12px;color:var(--green);letter-spacing:3px;margin-bottom:32px;font-weight:700}
+
+/* ─── MAP POPUP OVERRIDES ─── */
+.maplibregl-popup-content{background:rgba(16,16,28,0.96)!important;border-radius:12px!important;padding:0!important;border:1px solid rgba(255,255,255,0.08)!important;box-shadow:0 8px 28px rgba(0,0,0,0.5)!important;pointer-events:auto}
+.maplibregl-popup-tip{border-top-color:rgba(16,16,28,0.96)!important}
+.maplibregl-popup-close-button{color:#8B949E!important;font-size:18px!important;padding:4px 8px!important;right:4px!important;top:4px!important}
+.maplibregl-popup-close-button:hover{color:#fff!important;background:transparent!important}
+
+/* ─── MAP DEMO ─── */
+.mapdemo-section{padding:80px 0}
+.mapdemo-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;overflow:hidden}
+.mapdemo-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:0.5px solid var(--border)}
+.mapdemo-bar-left{display:flex;align-items:center;gap:10px}
+.mapdemo-bar-left .label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.mapdemo-bar-right{display:flex;align-items:center;gap:8px}
+.mapdemo-badge{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:4px;border:0.5px solid}
+.map-container{width:100%;height:480px;position:relative}
+.map-container .maplibregl-ctrl-bottom-left,.map-container .maplibregl-ctrl-bottom-right{opacity:.4}
+.map-sidebar{position:absolute;top:12px;right:12px;width:260px;max-height:calc(100% - 24px);display:flex;flex-direction:column;gap:8px;z-index:5;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(0,255,136,0.15) transparent}
+.map-inc-card{background:rgba(13,17,23,0.92);border:0.5px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:border-color .2s,transform .2s}
+.map-inc-card:hover{border-color:var(--green-border);transform:translateX(-4px)}
+.map-inc-card .top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.map-inc-card .top .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.map-inc-card .top .type{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.map-inc-card .top .time{font-size:9px;color:var(--muted);margin-left:auto}
+.map-inc-card .title{font-size:11px;font-weight:600;color:var(--text);line-height:1.35}
+.map-inc-card .meta{font-size:9px;color:var(--muted);margin-top:4px}
+.map-inc-card.new-incident{animation:card-slide-in .6s cubic-bezier(.16,1,.3,1) both;border-color:rgba(0,255,136,0.25);background:rgba(0,255,136,0.05)}
+@keyframes card-slide-in{from{opacity:0;transform:translateY(-16px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ─── LIVE FEED ─── */
+.feed-section{padding:80px 0}
+.feed-container{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;overflow:hidden}
+.feed-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid var(--border)}
+.feed-title{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.feed-live-badge{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:2px;color:var(--green);font-weight:700;text-transform:uppercase}
+.feed-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background .2s,padding-left .3s}
+.feed-row:last-child{border-bottom:none}
+.feed-row:hover{background:rgba(255,255,255,0.02);padding-left:28px}
+.feed-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:transform .3s}
+.feed-row:hover .feed-dot{transform:scale(1.4)}
+.feed-type{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;min-width:80px}
+.feed-text{flex:1;font-size:13px;color:var(--text)}
+.feed-badge{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--green-dim);color:var(--green);border:0.5px solid var(--green-border)}
+.feed-time{font-size:10px;color:var(--muted);min-width:60px;text-align:right}
+.feed-row.new-incident{animation:feed-slide .5s cubic-bezier(.16,1,.3,1) both;background:rgba(0,255,136,0.04)}
+@keyframes feed-slide{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ─── FEATURES ─── */
+.features-section{padding:0 0 80px}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:24px;transition:border-color .3s,transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;cursor:default}
+.feature-card:hover{border-color:var(--green-border);transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.feature-card .fd{width:6px;height:6px;border-radius:50%;background:var(--green);margin-bottom:14px;transition:transform .3s,box-shadow .3s}
+.feature-card:hover .fd{transform:scale(1.6);box-shadow:0 0 10px rgba(0,255,136,0.4)}
+.feature-card h3{font-size:14px;font-weight:700;margin-bottom:8px;letter-spacing:-0.3px;transition:color .3s}
+.feature-card:hover h3{color:var(--green)}
+.feature-card p{font-family:system-ui,-apple-system,sans-serif;font-size:13px;color:var(--muted);line-height:1.55}
+.feature-card .premium-tag{display:inline-block;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:rgba(255,165,0,0.12);color:var(--orange);border:0.5px solid rgba(255,165,0,0.3);margin-left:6px;vertical-align:middle}
+
+/* ─── PRICING ─── */
+.pricing-section{padding:0 0 80px}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:760px;margin:0 auto}
+.price-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:32px;transition:border-color .3s,transform .3s}
+.price-card:hover{transform:translateY(-3px)}
+.price-card.popular{border-color:var(--green-border);position:relative}
+.price-card.popular::before{content:'MAIS POPULAR';position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 14px;border-radius:10px;background:var(--green);color:var(--bg)}
+.price-card .plan-name{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.price-card .plan-price{font-size:40px;font-weight:700;letter-spacing:-2px;margin-bottom:4px}
+.price-card .plan-price .currency{font-size:18px;color:var(--muted);font-weight:400;vertical-align:super}
+.price-card .plan-price .period{font-size:13px;color:var(--muted);font-weight:400}
+.price-card .plan-desc{font-family:system-ui,sans-serif;font-size:12px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.price-card .plan-features{list-style:none;margin-bottom:28px}
+.price-card .plan-features li{font-size:12px;color:var(--text);padding:8px 0;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px}
+.price-card .plan-features li:last-child{border-bottom:none}
+.price-card .plan-features .check{color:var(--green);font-size:13px}
+.price-card .plan-features .lock{color:var(--muted);font-size:11px}
+.price-card .plan-features .disabled{color:rgba(139,148,158,0.4)}
+.plan-btn{width:100%;height:42px;font-family:'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:1px;border-radius:6px;cursor:pointer;transition:transform .2s,box-shadow .3s}
+.plan-btn.primary{background:var(--green);color:var(--bg);border:none}
+.plan-btn.primary:hover{transform:translateY(-1px);box-shadow:0 0 20px rgba(0,255,136,0.2)}
+.plan-btn.secondary{background:transparent;color:var(--text);border:0.5px solid var(--border)}
+.plan-btn.secondary:hover{border-color:rgba(255,255,255,0.2);transform:translateY(-1px)}
+
+/* ─── CTA BAND ─── */
+.cta-band{margin:0 0 80px;padding:40px 48px;background:rgba(0,255,136,0.06);border:0.5px solid var(--green-border);border-radius:10px;display:flex;align-items:center;justify-content:space-between;transition:border-color .3s,background .3s}
+.cta-band:hover{background:rgba(0,255,136,0.09);border-color:rgba(0,255,136,0.35)}
+.cta-band h2{font-size:28px;font-weight:700;letter-spacing:-1px;margin-bottom:8px}
+.cta-band h2 .accent{color:var(--green)}
+.cta-band p{font-family:system-ui,-apple-system,sans-serif;font-size:13px;color:var(--muted)}
+
+/* ─── FOOTER ─── */
+footer{border-top:0.5px solid var(--border);padding:28px 0}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.footer-logo .io{color:var(--green)}
+.footer-copy{font-size:11px;color:var(--muted)}
+.lang-chip{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'Courier New',monospace;font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .2s ease}
+.lang-chip:hover{border-color:var(--green-border);color:var(--text)}
+.lang-chip.active{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+
+/* ─── LOGIN MODAL ─── */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background .35s}
+.modal-overlay.visible{background:rgba(0,0,0,0.7);pointer-events:auto}
+.modal-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:24px 28px;width:360px;position:relative;transform:translateY(20px) scale(.96);opacity:0;transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .35s}
+.modal-overlay.visible .modal-card{transform:translateY(0) scale(1);opacity:1}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;font-family:'Courier New',monospace;transition:color .2s,transform .2s}
+.modal-close:hover{color:var(--text);transform:rotate(90deg)}
+
+/* ─── SCROLL PROGRESS ─── */
+.scroll-progress{position:fixed;top:0;left:0;height:2px;background:var(--green);z-index:101;width:0;transition:width .1s linear}
+
+/* ─── BACK TO TOP ─── */
+.back-to-top{position:fixed;bottom:28px;right:28px;width:40px;height:40px;border-radius:8px;background:var(--bg2);border:0.5px solid var(--border);color:var(--green);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:translateY(12px);transition:opacity .3s,transform .3s,border-color .25s;z-index:90;font-size:16px}
+.back-to-top.visible{opacity:1;transform:translateY(0)}
+.back-to-top:hover{border-color:var(--green-border)}
+
+/* ─── MAP MARKERS — fixed pixel size, never scales with zoom ─── */
+.maplibregl-marker{will-change:transform}
+.map-marker{width:36px;height:44px;display:flex;flex-direction:column;align-items:center;cursor:pointer;font-size:14px;line-height:1;pointer-events:auto}
+.map-marker:hover{z-index:500!important}
+.map-marker .mk-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.map-marker .mk-icon span{font-size:16px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));z-index:2;position:relative}
+.map-marker .mk-sev{position:absolute;top:-1px;right:-1px;width:8px;height:8px;border-radius:50%;border:1.5px solid #0D1117;z-index:3}
+.map-marker .mk-label{margin-top:1px;font-size:7px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap;max-width:50px;overflow:hidden;text-overflow:ellipsis;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.9),0 0 6px rgba(0,0,0,0.7)}
+.map-marker .mk-pulse{position:absolute;inset:0;border-radius:50%;animation:m-pulse 2.5s ease-out infinite;pointer-events:none}
+.map-marker .mk-verified{position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#0D1117;display:flex;align-items:center;justify-content:center;border:1px solid #00FF88;z-index:3;font-size:7px;line-height:1;color:#00FF88}
+
+.cam-mk{width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,170,255,0.18);border:1.5px solid rgba(0,170,255,0.6);font-size:13px;animation:cam-demo-pulse 3s ease-in-out infinite;pointer-events:auto}
+.cam-mk:hover{z-index:500!important;border-color:rgba(0,170,255,1)}
+
+@keyframes m-pulse{0%{transform:scale(1);opacity:.4}100%{transform:scale(2);opacity:0}}
+@keyframes cam-demo-pulse{0%,100%{box-shadow:0 0 6px rgba(0,170,255,0.3)}50%{box-shadow:0 0 14px rgba(0,170,255,0.7)}}
+
+/* ─── GLOBAL CURSOR GLOW ─── */
+body::after{content:'';position:fixed;width:500px;height:500px;border-radius:50%;pointer-events:none;z-index:9;
+  background:radial-gradient(circle,rgba(0,255,136,0.06) 0%,rgba(0,255,136,0.025) 35%,transparent 70%);
+  transform:translate(calc(var(--mx,50vw) - 250px),calc(var(--my,50vh) - 250px));
+  transition:transform .04s linear;top:0;left:0;mix-blend-mode:screen;filter:blur(1px)}
+
+/* ─── MAGNETIC BUTTONS ─── */
+.btn-primary,.btn-livedemo,.plan-btn{transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;will-change:transform}
+
+/* ─── 3D TILT CARDS ─── */
+.feature-card{transform-style:preserve-3d;transition:border-color .3s,transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;will-change:transform}
+.feature-card:hover{border-color:var(--green-border);box-shadow:0 12px 32px rgba(0,0,0,0.25),0 0 0 1px rgba(0,255,136,0.04)}
+
+/* ─── SECTION TITLE CURSOR ─── */
+.section-title::after{content:'▋';color:var(--green);opacity:.5;margin-left:4px;animation:blink-cursor .8s step-end infinite;font-size:10px}
+
+/* ─── STAT COUNTER FLASH ─── */
+@keyframes counter-flash{0%{text-shadow:0 0 0 transparent}30%{text-shadow:0 0 16px rgba(0,255,136,0.5),0 0 40px rgba(0,255,136,0.2)}100%{text-shadow:0 0 0 transparent}}
+.stat-num.flash{animation:counter-flash .8s ease-out}
+
+/* ─── HAMBURGER (hidden on desktop) ─── */
+.nav-hamburger{display:none;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:18px;padding:4px 8px;cursor:pointer;font-family:'Courier New',monospace;transition:border-color .2s,color .2s}
+.nav-hamburger:hover{border-color:var(--green);color:var(--green)}
+
+/* ─── RESPONSIVE: TABLETS ─── */
+@media(max-width:1024px){
+  .wrap{padding:0 24px}
+  .nav-inner{padding:0 24px}
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .map-sidebar{width:200px}
+  .cta-band{padding:32px 28px;flex-direction:column;text-align:center;gap:20px}
+  .hero h1{font-size:40px}
+  .pricing-grid{gap:14px}
+}
+
+/* ─── RESPONSIVE: PHONES ─── */
+@media(max-width:640px){
+  .wrap{padding:0 16px}
+  .nav-inner{padding:0 14px;height:50px}
+  .nav-logo{font-size:15px;gap:7px}
+  .nav-logo-svg,.nav-logo svg{width:22px!important;height:22px!important}
+  .nav-hamburger{display:block}
+  .nav-links{display:none;position:absolute;top:50px;left:0;right:0;background:rgba(13,17,23,0.98);border-bottom:1px solid var(--border);flex-direction:column;padding:16px 20px;gap:12px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .nav-links.mobile-open{display:flex}
+  .nav-links a[data-nav]{display:block;font-size:12px;padding:8px 0}
+  .nav-links .btn-primary{font-size:11px;padding:8px 16px;text-align:center;width:100%}
+
+  .hero{padding:100px 0 50px}
+  .hero h1{font-size:28px;letter-spacing:-1px}
+  .hero p.sub{font-size:14px;margin-bottom:28px}
+  .hero-actions{flex-direction:column;gap:10px;align-items:center}
+  .hero-badge{font-size:10px;padding:4px 12px}
+
+  .auth-card{padding:18px 16px;max-width:calc(100% - 32px)}
+  .auth-card .auth-header h2{font-size:15px}
+  .social-buttons{flex-direction:column}
+  .scroll-chevron{bottom:16px}
+
+  .stats-grid{flex-wrap:wrap}
+  .stat-item{flex:1 1 50%;border-right:none;padding:12px 0}
+  .stat-num{font-size:24px}
+
+  .features-grid{grid-template-columns:1fr}
+  .feature-card{padding:18px}
+
+  .mapdemo-section{padding:40px 0}
+  .map-container{height:320px}
+  .map-sidebar{display:none}
+  .mapdemo-bar{flex-wrap:wrap;gap:8px;padding:10px 14px}
+  .mapdemo-bar-right{flex-wrap:wrap;gap:4px}
+
+  .feed-row{padding:10px 14px;gap:10px}
+  .feed-type{min-width:60px;font-size:9px}
+  .feed-text{font-size:11px}
+  .feed-time{font-size:9px;min-width:50px}
+
+  .pricing-grid{grid-template-columns:1fr;max-width:100%}
+  .price-card{padding:24px}
+  .price-card .plan-price{font-size:32px}
+
+  .cta-band{padding:24px 20px;flex-direction:column;text-align:center;gap:16px;margin:0 16px 60px}
+  .cta-band h2{font-size:22px}
+
+  .footer-inner{flex-direction:column;gap:12px;text-align:center}
+
+  .modal-card{width:calc(100% - 32px);padding:20px 16px}
+
+  .back-to-top{bottom:16px;right:16px;width:36px;height:36px}
+  .section-title{font-size:10px;letter-spacing:2px;margin-bottom:24px}
+  .feed-section{padding:40px 0}
+  .features-section{padding:0 0 40px}
+  .pricing-section{padding:0 0 40px}
+}
+
+/* ─── RESPONSIVE: SMALL PHONES ─── */
+@media(max-width:380px){
+  .hero h1{font-size:24px}
+  .hero p.sub{font-size:13px}
+  .auth-card{padding:16px 14px}
+  .map-container{height:260px}
+  .price-card .plan-price{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<div class="page-grid"></div>
+<div class="page-particles"><canvas id="pageCanvas"></canvas></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav id="mainNav">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="goToTop()">
+      <svg class="nav-logo-svg" width="28" height="28" viewBox="0 0 48 48" fill="none">
+        <defs><radialGradient id="nav-rg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00FF88" stop-opacity="0.12"/><stop offset="100%" stop-color="#00FF88" stop-opacity="0"/></radialGradient></defs>
+        <circle cx="24" cy="24" r="22" fill="url(#nav-rg)"/>
+        <circle cx="24" cy="24" r="21" stroke="#00FF88" stroke-width="0.6" opacity="0.15" fill="none" stroke-dasharray="3 4"/>
+        <circle cx="24" cy="24" r="17" stroke="#00FF88" stroke-width="0.7" opacity="0.22" fill="none"/>
+        <circle cx="24" cy="24" r="12" stroke="#00FF88" stroke-width="0.9" opacity="0.38" fill="none"/>
+        <circle cx="24" cy="24" r="7" stroke="#00FF88" stroke-width="1.1" opacity="0.6" fill="none"/>
+        <circle cx="24" cy="24" r="2.8" fill="#00FF88" opacity="0.85"/>
+        <line x1="24" y1="1.5" x2="24" y2="5.5" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+        <line x1="24" y1="42.5" x2="24" y2="46.5" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+        <line x1="1.5" y1="24" x2="5.5" y2="24" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+        <line x1="42.5" y1="24" x2="46.5" y2="24" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+        <circle cx="14" cy="17" r="1.3" fill="#00FF88" opacity="0.5"/>
+        <circle cx="30" cy="35" r="1" fill="#00FF88" opacity="0.35"/>
+        <circle cx="37" cy="21" r="0.8" fill="#00FF88" opacity="0.25"/>
+        <g style="animation:radar-spin 8s linear infinite;transform-origin:24px 24px">
+          <path d="M24 24L38.5 13A18.2 18.2 0 0 0 29 6Z" fill="#00FF88" opacity="0.10"/>
+          <line x1="24" y1="24" x2="39" y2="9" stroke="#00FF88" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+        </g>
+      </svg>
+      Alert<span class="io">.io</span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="#features" data-nav>Produto</a>
+      <a href="#mapdemo" data-nav>Demo</a>
+      <a href="#pricing" data-nav>Preços</a>
+      <a href="#feed" data-nav>Feed</a>
+      <button class="btn-primary" onclick="openModal()">[ ENTRAR ]</button>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero" id="hero">
+  <div class="hero-glow" id="heroGlow"></div>
+  <div class="wrap">
+    <div class="hero-badge">
+      <span class="dot-live"></span>
+      <span id="incidentCounter">30</span> incidentes ativos agora
+    </div>
+    <h1>Incidentes não<br><span class="accent" id="typedTarget">esperam.</span><br>Você também não.</h1>
+    <p class="sub">Monitorize, detete e responda a incidentes de segurança em tempo real. Uma plataforma. Zero pontos cegos.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" style="padding:0 28px;height:46px;font-size:13px" onclick="goTo('#auth')">[ COMEÇAR GRÁTIS ]</button>
+      <button class="btn-ghost" style="padding:0 28px;height:46px;font-size:13px" onclick="goTo('#mapdemo')">Ver mapa ao vivo →</button>
+    </div>
+    <div style="margin-top:24px;animation:h1-enter 1s cubic-bezier(.16,1,.3,1) .7s both">
+      <button class="btn-livedemo" onclick="openLiveDemo()">
+        <span class="btn-livedemo-dot"></span>
+        <span>VER DEMO AO VIVO</span>
+        <span class="btn-livedemo-arrow">→</span>
+      </button>
+      <p style="font-size:10px;color:var(--muted);margin-top:8px;letter-spacing:1px;font-family:system-ui,sans-serif">
+        Veja todas as funcionalidades a funcionar automaticamente — sem criar conta
+      </p>
+    </div>
+  </div>
+  <div class="scroll-chevron" id="scrollChevron" onclick="goTo('#auth')"><span></span><span></span></div>
+</section>
+
+<!-- ═══════════ AUTH SECTION ═══════════ -->
+<section class="auth-section" id="auth">
+  <div class="wrap">
+    <div class="auth-card reveal-scale">
+      <div class="auth-header">
+        <svg width="28" height="28" viewBox="0 0 48 48" fill="none" style="margin:0 auto 8px;display:block">
+          <defs><radialGradient id="rg1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00FF88" stop-opacity="0.12"/><stop offset="100%" stop-color="#00FF88" stop-opacity="0"/></radialGradient></defs>
+          <circle cx="24" cy="24" r="22" fill="url(#rg1)"/>
+          <circle cx="24" cy="24" r="21" stroke="#00FF88" stroke-width="0.6" opacity="0.15" fill="none" stroke-dasharray="3 4"/>
+          <circle cx="24" cy="24" r="17" stroke="#00FF88" stroke-width="0.7" opacity="0.22" fill="none"/>
+          <circle cx="24" cy="24" r="12" stroke="#00FF88" stroke-width="0.9" opacity="0.38" fill="none"/>
+          <circle cx="24" cy="24" r="7" stroke="#00FF88" stroke-width="1.1" opacity="0.6" fill="none"/>
+          <path d="M24 24L38.5 13A18.2 18.2 0 0 0 29 6Z" fill="#00FF88" opacity="0.1"/>
+          <line x1="24" y1="24" x2="39" y2="9" stroke="#00FF88" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+          <circle cx="24" cy="24" r="4.5" fill="#00FF88" opacity="0.12"/>
+          <circle cx="24" cy="24" r="2.8" fill="#00FF88" opacity="0.85"/>
+          <line x1="24" y1="1.5" x2="24" y2="5.5" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+          <line x1="24" y1="42.5" x2="24" y2="46.5" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+          <line x1="1.5" y1="24" x2="5.5" y2="24" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+          <line x1="42.5" y1="24" x2="46.5" y2="24" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+          <circle cx="14" cy="17" r="1.3" fill="#00FF88" opacity="0.5"/>
+          <circle cx="30" cy="35" r="1" fill="#00FF88" opacity="0.35"/>
+          <circle cx="37" cy="21" r="0.8" fill="#00FF88" opacity="0.25"/>
+        </svg>
+        <h2>Aceder ao <span style="color:var(--green)">Alert.io</span></h2>
+        <p>MONITORIZAÇÃO EM TEMPO REAL</p>
+      </div>
+
+      <div id="authForms">
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">ENTRAR</div>
+          <div class="auth-tab" id="tab-register" onclick="switchTab('register')">CRIAR CONTA</div>
+        </div>
+
+        <form id="form-login" onsubmit="handleLogin(event)">
+          <div class="form-group"><label>E-MAIL</label><input type="email" placeholder="operador@alert.io" required autocomplete="email"/></div>
+          <div class="form-group"><label>PALAVRA-PASSE</label><input type="password" placeholder="••••••••••" required autocomplete="current-password"/></div>
+          <div class="form-row">
+            <label class="form-check"><input type="checkbox"/> Manter sessão</label>
+            <span class="form-forgot" onclick="showToast('Link de recuperação enviado para o seu e-mail.')">Esqueci a senha</span>
+          </div>
+          <button type="submit" class="auth-submit">[ ENTRAR ]</button>
+          <div class="auth-divider"><span>ou</span></div>
+          <div class="social-buttons">
+            <div class="social-btn" onclick="showToast('Google Auth em breve.')">G · Google</div>
+            <div class="social-btn" onclick="showToast('Microsoft Auth em breve.')">⊞ · Microsoft</div>
+            <div class="social-btn" onclick="showToast('SSO em breve.')">⌘ · SSO</div>
+          </div>
+          <div class="auth-footer">Não tem conta? <a onclick="switchTab('register')">Criar agora</a></div>
+        </form>
+
+        <form id="form-register" style="display:none" onsubmit="handleRegister(event)">
+          <div class="form-group"><label>NOME COMPLETO</label><input type="text" placeholder="Maria Lima" required autocomplete="name"/></div>
+          <div class="form-group"><label>E-MAIL</label><input type="email" placeholder="operador@alert.io" required autocomplete="email"/></div>
+          <div class="form-group"><label>EQUIPA / ORGANIZAÇÃO</label><input type="text" placeholder="ex: SecOps — Startup X"/></div>
+          <div class="form-group"><label>PALAVRA-PASSE</label><input type="password" placeholder="Min. 8 caracteres" required minlength="8" autocomplete="new-password"/></div>
+          <div class="form-group"><label>CONFIRMAR PALAVRA-PASSE</label><input type="password" placeholder="Repetir" required minlength="8" autocomplete="new-password"/></div>
+          <div class="form-row"><label class="form-check"><input type="checkbox" required/> Aceito os termos de serviço</label></div>
+          <button type="submit" class="auth-submit">[ CRIAR CONTA ]</button>
+          <div class="auth-divider"><span>ou</span></div>
+          <div class="social-buttons">
+            <div class="social-btn" onclick="showToast('Google Auth em breve.')">G · Google</div>
+            <div class="social-btn" onclick="showToast('Microsoft Auth em breve.')">⊞ · Microsoft</div>
+            <div class="social-btn" onclick="showToast('SSO em breve.')">⌘ · SSO</div>
+          </div>
+          <div class="auth-footer">Já tem conta? <a onclick="switchTab('login')">Entrar</a></div>
+        </form>
+      </div>
+
+      <div class="auth-success" id="authSuccess">
+        <div class="check">✓</div>
+        <h3>Bem-vindo ao <span style="color:var(--green)">Alert.io</span></h3>
+        <p>Sessão iniciada. A redirecionar para a aplicação...</p>
+        <div style="display:flex;gap:10px">
+          <a href="/app?autologin=1" class="btn-primary" style="flex:1;justify-content:center;padding:10px;text-decoration:none">[ ENTRAR NA APP ]</a>
+          <button class="btn-ghost" style="flex:1;justify-content:center;padding:10px" onclick="goTo('#mapdemo')">Ver Demo →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ STATS BAR ═══════════ -->
+<section class="stats" id="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat-item reveal"><div class="stat-num"><span data-counter="3" data-suffix="">0</span><span class="unit">s</span></div><div class="stat-label">Tempo médio de alerta</div></div>
+      <div class="stat-item reveal"><div class="stat-num"><span data-counter="99.9" data-suffix="" data-decimals="1">0</span><span class="unit">%</span></div><div class="stat-label">Uptime garantido</div></div>
+      <div class="stat-item reveal"><div class="stat-num"><span data-counter="2" data-suffix="k">0</span><span class="unit">+</span></div><div class="stat-label">Equipas ativas</div></div>
+      <div class="stat-item reveal"><div class="stat-num">-<span data-counter="68" data-suffix="">0</span><span class="unit">%</span></div><div class="stat-label">Tempo de resposta</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ MAP DEMO ═══════════ -->
+<section class="mapdemo-section" id="mapdemo">
+  <div class="wrap">
+    <div class="section-title reveal">// Mapa de incidentes — Demo ao vivo</div>
+    <div class="mapdemo-wrap reveal-scale">
+      <div class="mapdemo-bar">
+        <div class="mapdemo-bar-left">
+          <span class="dot-live"></span>
+          <span class="label">Dashboard · Porto</span>
+        </div>
+        <div class="mapdemo-bar-right">
+          <span class="mapdemo-badge" style="color:var(--red);border-color:rgba(255,71,87,0.3);background:rgba(255,71,87,0.1)">2 CRÍTICO</span>
+          <span class="mapdemo-badge" style="color:var(--yellow);border-color:rgba(255,215,0,0.3);background:rgba(255,215,0,0.1)">3 MÉDIO</span>
+          <span class="mapdemo-badge" style="color:var(--green);border-color:var(--green-border);background:var(--green-dim)">1 VERIFICADO</span>
+        </div>
+      </div>
+      <div class="map-container" id="mapContainer">
+        <div class="map-sidebar" id="mapSidebar"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ LIVE FEED ═══════════ -->
+<section class="feed-section" id="feed">
+  <div class="wrap">
+    <div class="section-title reveal">// Feed de atividade</div>
+    <div class="feed-container reveal-scale">
+      <div class="feed-header">
+        <span class="feed-title">FEED DE INCIDENTES</span>
+        <span class="feed-live-badge"><span class="dot-live"></span> AO VIVO</span>
+      </div>
+      <div id="feedList">
+        <div class="feed-row" onclick="goTo('#mapdemo')"><span class="feed-dot" style="background:var(--red)"></span><span class="feed-type" style="color:var(--red)">ROUBO</span><span class="feed-text">Tentativa de assalto junto à estação de Maia</span><span class="feed-badge">VERIFICADO</span><span class="feed-time">20m</span></div>
+        <div class="feed-row" onclick="goTo('#mapdemo')"><span class="feed-dot" style="background:var(--yellow)"></span><span class="feed-type" style="color:var(--yellow)">ACIDENTE</span><span class="feed-text">Colisão entre 2 viaturas na A28 — km 14</span><span class="feed-time">45m</span></div>
+        <div class="feed-row" onclick="goTo('#mapdemo')"><span class="feed-dot" style="background:var(--purple)"></span><span class="feed-type" style="color:var(--purple)">SUSPEITO</span><span class="feed-text">Indivíduo com comportamento errático — Praça da República</span><span class="feed-badge">VERIFICADO</span><span class="feed-time">1h</span></div>
+        <div class="feed-row" onclick="goTo('#mapdemo')"><span class="feed-dot" style="background:var(--orange)"></span><span class="feed-type" style="color:var(--orange)">INCÊNDIO</span><span class="feed-text">Foco de incêndio em terreno baldio — zona industrial</span><span class="feed-time">10m</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FEATURES ═══════════ -->
+<section class="features-section" id="features">
+  <div class="wrap">
+    <div class="section-title reveal">// Funcionalidades</div>
+    <div class="features-grid stagger-children">
+      <div class="feature-card reveal"><div class="fd"></div><h3>Alertas em tempo real</h3><p>Receba notificações instantâneas de incidentes na sua área. Sem atrasos, sem pontos cegos.</p></div>
+      <div class="feature-card reveal"><div class="fd"></div><h3>Detecção inteligente</h3><p>Algoritmos que classificam severidade automaticamente e eliminam falsos positivos.</p></div>
+      <div class="feature-card reveal"><div class="fd"></div><h3>Dashboard ao vivo</h3><p>Visualize todos os incidentes num mapa interativo com dados em tempo real e filtros avançados.</p></div>
+      <div class="feature-card reveal"><div class="fd"></div><h3>Safety Chain <span class="premium-tag">PREMIUM</span></h3><p>Conecte pessoas, veículos, pets e dispositivos. Partilhe localização e envie alertas SOS.</p></div>
+      <div class="feature-card reveal"><div class="fd"></div><h3>Navegação <span class="premium-tag">PREMIUM</span></h3><p>Modo condução com velocímetro, alertas de radar e rota em tempo real com ETA.</p></div>
+      <div class="feature-card reveal"><div class="fd"></div><h3>Family System <span class="premium-tag">PREMIUM</span></h3><p>Conecte a família inteira. Veja a localização em tempo real e receba alertas de segurança.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PRICING ═══════════ -->
+<section class="pricing-section" id="pricing">
+  <div class="wrap">
+    <div class="section-title reveal">// Planos</div>
+    <div class="pricing-grid stagger-children">
+      <div class="price-card reveal">
+        <div class="plan-name">GRATUITO</div>
+        <div class="plan-price">0<span class="currency">€</span> <span class="period">/ sempre</span></div>
+        <div class="plan-desc">Todas as funcionalidades essenciais para monitorizar a sua zona.</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Mapa de incidentes ao vivo</li>
+          <li><span class="check">✓</span> Alertas em tempo real</li>
+          <li><span class="check">✓</span> Reportar incidentes</li>
+          <li><span class="check">✓</span> Feed de atividade</li>
+          <li><span class="check">✓</span> Detecção inteligente</li>
+          <li class="disabled"><span class="lock">✕</span> Safety Chain</li>
+          <li class="disabled"><span class="lock">✕</span> Navegação / Drive Mode</li>
+          <li class="disabled"><span class="lock">✕</span> Family System</li>
+        </ul>
+        <button class="plan-btn secondary" onclick="goTo('#auth')">[ CRIAR CONTA GRÁTIS ]</button>
+      </div>
+      <div class="price-card popular reveal">
+        <div class="plan-name">PREMIUM</div>
+        <div class="plan-price">4<span class="currency">,99€</span> <span class="period">/ mês</span></div>
+        <div class="plan-desc">Tudo do plano gratuito + funcionalidades avançadas de proteção.</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Tudo do plano gratuito</li>
+          <li><span class="check">✓</span> <strong>Safety Chain</strong> — proteja quem importa</li>
+          <li><span class="check">✓</span> <strong>Navegação</strong> — Drive Mode completo</li>
+          <li><span class="check">✓</span> <strong>Family System</strong> — localização familiar</li>
+          <li><span class="check">✓</span> Alertas SOS ilimitados</li>
+          <li><span class="check">✓</span> Rastreio de veículos e pets</li>
+          <li><span class="check">✓</span> Alertas de radar e velocidade</li>
+          <li><span class="check">✓</span> Suporte prioritário</li>
+        </ul>
+        <button class="plan-btn primary" onclick="goTo('#auth')">[ COMEÇAR 14 DIAS GRÁTIS ]</button>
+        <div style="text-align:center;margin-top:12px">
+          <a href="javascript:openLiveDemo()" style="display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);letter-spacing:1px;transition:color .2s">
+            <span style="width:6px;height:6px;border-radius:50%;background:#FF2D2D;animation:pulse 1.5s ease-in-out infinite"></span>
+            Ver demo ao vivo antes de comprar →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CTA BAND ═══════════ -->
+<section class="wrap">
+  <div class="cta-band reveal">
+    <div>
+      <h2>Pronto para <span class="accent">reagir mais rápido?</span></h2>
+      <p>Comece grátis. Atualize para Premium por apenas 4,99€/mês.</p>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <button class="btn-primary" style="padding:0 32px;height:48px;font-size:14px" onclick="goTo('#auth')">[ COMEÇAR GRÁTIS ]</button>
+      <button class="btn-livedemo btn-livedemo-sm" onclick="openLiveDemo()">
+        <span class="btn-livedemo-dot"></span>
+        <span>VER DEMO</span>
+        <span class="btn-livedemo-arrow">→</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-logo" style="cursor:pointer" onclick="goToTop()">
+        <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
+          <defs><radialGradient id="ft-rg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00FF88" stop-opacity="0.12"/><stop offset="100%" stop-color="#00FF88" stop-opacity="0"/></radialGradient></defs>
+          <circle cx="24" cy="24" r="22" fill="url(#ft-rg)"/>
+          <circle cx="24" cy="24" r="21" stroke="#00FF88" stroke-width="0.6" opacity="0.15" fill="none" stroke-dasharray="3 4"/>
+          <circle cx="24" cy="24" r="17" stroke="#00FF88" stroke-width="0.7" opacity="0.22" fill="none"/>
+          <circle cx="24" cy="24" r="12" stroke="#00FF88" stroke-width="0.9" opacity="0.38" fill="none"/>
+          <circle cx="24" cy="24" r="7" stroke="#00FF88" stroke-width="1.1" opacity="0.6" fill="none"/>
+          <circle cx="24" cy="24" r="2.8" fill="#00FF88" opacity="0.85"/>
+          <line x1="24" y1="1.5" x2="24" y2="5.5" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+          <line x1="24" y1="42.5" x2="24" y2="46.5" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+          <line x1="1.5" y1="24" x2="5.5" y2="24" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+          <line x1="42.5" y1="24" x2="46.5" y2="24" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+          <circle cx="14" cy="17" r="1.3" fill="#00FF88" opacity="0.5"/>
+          <circle cx="30" cy="35" r="1" fill="#00FF88" opacity="0.35"/>
+          <g style="animation:radar-spin 8s linear infinite;transform-origin:24px 24px">
+            <path d="M24 24L38.5 13A18.2 18.2 0 0 0 29 6Z" fill="#00FF88" opacity="0.10"/>
+            <line x1="24" y1="24" x2="39" y2="9" stroke="#00FF88" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+          </g>
+        </svg>
+        Alert<span class="io">.io</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="footer-copy">© 2026 Alert.io — From alert to action.</div>
+        <div id="langSwitcher" style="display:flex;gap:4px">
+          <button onclick="setLang('pt')" class="lang-chip active" data-lang="pt">PT</button>
+          <button onclick="setLang('en')" class="lang-chip" data-lang="en">EN</button>
+          <button onclick="setLang('es')" class="lang-chip" data-lang="es">ES</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="back-to-top" id="backToTop" onclick="goToTop()">↑</div>
+
+<!-- ═══════════ LOGIN MODAL ═══════════ -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="auth-header" style="text-align:center;margin-bottom:24px">
+      <svg width="32" height="32" viewBox="0 0 48 48" fill="none" style="margin:0 auto 10px;display:block">
+        <defs><radialGradient id="rg2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00FF88" stop-opacity="0.12"/><stop offset="100%" stop-color="#00FF88" stop-opacity="0"/></radialGradient></defs>
+        <circle cx="24" cy="24" r="22" fill="url(#rg2)"/>
+        <circle cx="24" cy="24" r="21" stroke="#00FF88" stroke-width="0.6" opacity="0.15" fill="none" stroke-dasharray="3 4"/>
+        <circle cx="24" cy="24" r="17" stroke="#00FF88" stroke-width="0.7" opacity="0.22" fill="none"/>
+        <circle cx="24" cy="24" r="12" stroke="#00FF88" stroke-width="0.9" opacity="0.38" fill="none"/>
+        <circle cx="24" cy="24" r="7" stroke="#00FF88" stroke-width="1.1" opacity="0.6" fill="none"/>
+        <circle cx="24" cy="24" r="2.8" fill="#00FF88" opacity="0.85"/>
+        <line x1="24" y1="1.5" x2="24" y2="5.5" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+        <line x1="24" y1="42.5" x2="24" y2="46.5" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+        <line x1="1.5" y1="24" x2="5.5" y2="24" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+        <line x1="42.5" y1="24" x2="46.5" y2="24" stroke="#00FF88" stroke-width="0.7" stroke-linecap="round" opacity="0.3"/>
+        <circle cx="14" cy="17" r="1.3" fill="#00FF88" opacity="0.5"/>
+        <circle cx="30" cy="35" r="1" fill="#00FF88" opacity="0.35"/>
+        <circle cx="37" cy="21" r="0.8" fill="#00FF88" opacity="0.25"/>
+        <g style="animation:radar-spin 12s linear infinite;transform-origin:24px 24px">
+          <path d="M24 24L38.5 13A18.2 18.2 0 0 0 29 6Z" fill="#00FF88" opacity="0.10"/>
+          <line x1="24" y1="24" x2="39" y2="9" stroke="#00FF88" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+        </g>
+      </svg>
+      <h2 style="font-size:18px;font-weight:700">Entrar no <span style="color:var(--green)">Alert.io</span></h2>
+    </div>
+    <div id="modalForms">
+      <form onsubmit="handleModalLogin(event)">
+        <div class="form-group"><label>E-MAIL</label><input type="email" placeholder="operador@alert.io" required/></div>
+        <div class="form-group"><label>PALAVRA-PASSE</label><input type="password" placeholder="••••••••••" required/></div>
+        <div class="form-row">
+          <label class="form-check"><input type="checkbox"/> Manter sessão</label>
+          <span class="form-forgot" onclick="showToast('Link de recuperação enviado.')">Esqueci a senha</span>
+        </div>
+        <button type="submit" class="auth-submit">[ ENTRAR ]</button>
+        <div class="auth-divider"><span>ou</span></div>
+        <div class="social-buttons">
+          <div class="social-btn" onclick="showToast('Google Auth em breve.')">G · Google</div>
+          <div class="social-btn" onclick="showToast('Microsoft Auth em breve.')">⊞ · Microsoft</div>
+        </div>
+      </form>
+    </div>
+    <div class="auth-success" id="modalSuccess">
+      <div class="check">✓</div>
+      <h3>Sessão iniciada</h3>
+      <p>A redirecionar para a aplicação...</p>
+      <a href="/app?autologin=1" class="btn-primary" style="width:100%;justify-content:center;padding:10px;text-decoration:none">[ ENTRAR NA APP ]</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ NAVIGATION — renamed to avoid shadowing window.scrollTo ═══ */
+function goTo(sel) {
+  var el = document.querySelector(sel);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function goToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+/* ═══ LIVE DEMO — opens the app with auto-starting demo ═══ */
+function openLiveDemo() {
+  var demoUrl = (window.ALERT_APP_URL || '/app') + '/?demo=1&autostart=1';
+  var w = window.open(demoUrl, '_blank', 'noopener');
+  if (!w) window.location.href = demoUrl;
+}
+
+/* ═══ NAV SCROLL EFFECT ═══ */
+var navEl = document.getElementById('mainNav');
+var navLinks = document.querySelectorAll('[data-nav]');
+var sectionIds = ['hero','auth','stats','mapdemo','feed','features','pricing'];
+function updateNav() {
+  var y = window.scrollY;
+  navEl.classList.toggle('scrolled', y > 40);
+  document.getElementById('backToTop').classList.toggle('visible', y > 500);
+  var h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('scrollProgress').style.width = (h > 0 ? (y / h) * 100 : 0) + '%';
+  var current = '';
+  sectionIds.forEach(function(id) {
+    var sec = document.getElementById(id);
+    if (sec && sec.getBoundingClientRect().top < 200) current = id;
+  });
+  navLinks.forEach(function(a) { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
+}
+window.addEventListener('scroll', updateNav, { passive: true });
+updateNav();
+
+/* ═══ SMOOTH ANCHOR LINKS ═══ */
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    var t = document.querySelector(this.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+/* ═══ SCROLL REVEAL (enhanced) ═══ */
+var revealEls = document.querySelectorAll('.reveal,.reveal-scale,.reveal-left,.reveal-right,.reveal-fade');
+var revealObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      e.target.querySelectorAll('[data-counter]').forEach(animateCounter);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+revealEls.forEach(function(el) { revealObs.observe(el); });
+
+/* ═══ COUNTER ANIMATION (with flash) ═══ */
+function animateCounter(el) {
+  if (el.dataset.animated) return;
+  el.dataset.animated = '1';
+  var target = parseFloat(el.dataset.counter), suffix = el.dataset.suffix || '', decimals = parseInt(el.dataset.decimals) || 0;
+  var start = performance.now();
+  var parent = el.closest('.stat-num');
+  (function step(now) {
+    var p = Math.min((now - start) / 1800, 1);
+    el.textContent = (target * (1 - Math.pow(1 - p, 3))).toFixed(decimals) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+    else if (parent) { parent.classList.add('flash'); setTimeout(function(){ parent.classList.remove('flash'); }, 900); }
+  })(performance.now());
+}
+
+/* ═══ FULL-PAGE PARTICLES ═══ */
+(function() {
+  var c = document.getElementById('pageCanvas'), ctx = c.getContext('2d'), dots = [];
+  var pmx = 0, pmy = 0;
+  function resize() { c.width = window.innerWidth; c.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  document.addEventListener('mousemove', function(e) { pmx = e.clientX; pmy = e.clientY; });
+  for (var i = 0; i < 90; i++) dots.push({ x: Math.random()*c.width, y: Math.random()*c.height, vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25, r:Math.random()*1.8+.3, base:Math.random()*0.08+0.02 });
+  var paused = false;
+  document.addEventListener('visibilitychange', function() { paused = document.hidden; });
+  (function draw() {
+    if (!paused) {
+      ctx.clearRect(0,0,c.width,c.height);
+      dots.forEach(function(d,i) {
+        var mdx=d.x-pmx, mdy=d.y-pmy, mdist=Math.sqrt(mdx*mdx+mdy*mdy);
+        if(mdist<180 && mdist>1){var f=0.6*(1-mdist/180); d.vx+=mdx/mdist*f; d.vy+=mdy/mdist*f;}
+        d.vx*=0.985; d.vy*=0.985;
+        d.x+=d.vx; d.y+=d.vy;
+        if(d.x<0)d.x=c.width; if(d.x>c.width)d.x=0; if(d.y<0)d.y=c.height; if(d.y>c.height)d.y=0;
+        var glow = mdist<220 ? d.base+0.06*(1-mdist/220) : d.base;
+        ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2); ctx.fillStyle='rgba(0,255,136,'+glow+')'; ctx.fill();
+        for(var j=i+1;j<dots.length;j++){var d2=dots[j],dx2=d.x-d2.x,dy2=d.y-d2.y,dist=Math.sqrt(dx2*dx2+dy2*dy2);
+          if(dist<140){ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d2.x,d2.y);ctx.strokeStyle='rgba(0,255,136,'+(0.04*(1-dist/140))+')';ctx.lineWidth=.4;ctx.stroke();}}
+      });
+    }
+    requestAnimationFrame(draw);
+  })();
+})();
+
+/* ═══ TYPED TEXT ═══ */
+(function() {
+  var words=['esperam.','param.','descansam.','esperam.'], el=document.getElementById('typedTarget'), wi=0,ci=0,del=false,pause=0;
+  function tick() {
+    var w=words[wi];
+    if(pause>0){pause--;setTimeout(tick,60);return;}
+    if(!del){ci++;el.innerHTML=w.substring(0,ci)+'<span class="typed-cursor"></span>';if(ci===w.length){del=true;pause=30;}setTimeout(tick,70+Math.random()*50);}
+    else{ci--;el.innerHTML=w.substring(0,ci)+'<span class="typed-cursor"></span>';if(ci===0){del=false;wi=(wi+1)%words.length;pause=8;}setTimeout(tick,35);}
+  }
+  setTimeout(tick,2000);
+})();
+
+/* ═══ AUTH LOGIC ═══ */
+var APP_URL = window.ALERT_APP_URL || '/app';
+
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('form-login').style.display = tab==='login'?'block':'none';
+  document.getElementById('form-register').style.display = tab==='register'?'block':'none';
+}
+function redirectToApp() {
+  showToast('A redirecionar para a aplicação...');
+  var target = APP_URL + '?autologin=1';
+  setTimeout(function(){
+    window.location.href = target;
+  }, 800);
+}
+function handleLogin(e) {
+  e.preventDefault();
+  document.getElementById('authForms').style.display = 'none';
+  document.getElementById('authSuccess').classList.add('show');
+  redirectToApp();
+}
+function handleRegister(e) {
+  e.preventDefault();
+  var pw = e.target.querySelectorAll('input[type=password]');
+  if (pw[0].value !== pw[1].value) { showToast('As palavras-passe não coincidem.'); return; }
+  document.getElementById('authForms').style.display = 'none';
+  document.getElementById('authSuccess').classList.add('show');
+  redirectToApp();
+}
+function handleModalLogin(e) {
+  e.preventDefault();
+  document.getElementById('modalForms').style.display = 'none';
+  document.getElementById('modalSuccess').classList.add('show');
+  redirectToApp();
+}
+
+/* ═══ MOBILE NAV ═══ */
+function toggleMobileNav() {
+  const links = document.getElementById('navLinks');
+  const btn = document.getElementById('navHamburger');
+  links.classList.toggle('mobile-open');
+  btn.textContent = links.classList.contains('mobile-open') ? '✕' : '☰';
+}
+
+document.querySelectorAll('.nav-links a[data-nav]').forEach(a => {
+  a.addEventListener('click', () => {
+    const links = document.getElementById('navLinks');
+    const btn = document.getElementById('navHamburger');
+    links.classList.remove('mobile-open');
+    btn.textContent = '☰';
+  });
+});
+
+/* ═══ MODAL ═══ */
+function openModal() {
+  document.getElementById('modalForms').style.display = 'block';
+  document.getElementById('modalSuccess').classList.remove('show');
+  document.getElementById('loginModal').classList.add('visible');
+}
+function closeModal() { document.getElementById('loginModal').classList.remove('visible'); }
+document.getElementById('loginModal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+document.addEventListener('keydown', function(e) {
+  if(e.key==='Escape') closeModal();
+  if(e.key==='Tab' && document.getElementById('loginModal').classList.contains('visible')) {
+    var modal = document.querySelector('.modal-card');
+    var focusable = modal.querySelectorAll('input,button,.social-btn,.modal-close');
+    if(focusable.length===0) return;
+    var first=focusable[0], last=focusable[focusable.length-1];
+    if(e.shiftKey && document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first.focus();}
+  }
+});
+
+/* ═══ TOAST ═══ */
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:#161B22;border:0.5px solid rgba(0,255,136,0.25);color:#00FF88;font-family:"Courier New",monospace;font-size:12px;padding:12px 24px;border-radius:6px;z-index:999;letter-spacing:0.5px;opacity:0;transition:opacity .3s,transform .3s;';
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';});
+  setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(12px)';},3000);
+  setTimeout(function(){t.remove();},3400);
+}
+
+/* ═══ LIVE FEED ═══ */
+var feedData=[
+  {type:'VANDALISMO',color:'#BC8CFF',text:'Grafiti em propriedade privada — Rua de Cedofeita',badge:false},
+  {type:'ROUBO',color:'#FF4757',text:'Furto de telemóvel na estação de São Bento',badge:true},
+  {type:'ACIDENTE',color:'#FFD700',text:'Queda de motociclista na Av. da Boavista',badge:false},
+  {type:'SUSPEITO',color:'#BC8CFF',text:'Veículo suspeito estacionado há 4 horas — Foz',badge:true},
+  {type:'INCÊNDIO',color:'#FFA500',text:'Alarme de incêndio — Centro Comercial Via Catarina',badge:false},
+];
+var feedIdx=0;
+setInterval(function(){
+  var list=document.getElementById('feedList');if(!list)return;
+  var d=feedData[feedIdx%feedData.length];
+  var row=document.createElement('div');
+  row.className='feed-row new-incident';
+  row.setAttribute('onclick',"goTo('#mapdemo')");
+  row.innerHTML='<span class="feed-dot" style="background:'+d.color+'"></span><span class="feed-type" style="color:'+d.color+'">'+d.type+'</span><span class="feed-text">'+d.text+'</span>'+(d.badge?'<span class="feed-badge">VERIFICADO</span>':'')+'<span class="feed-time">agora</span>';
+  list.insertBefore(row,list.firstChild);
+  if(list.children.length>8)list.removeChild(list.lastChild);
+  feedIdx++;
+  var c=document.getElementById('incidentCounter'); c.textContent=parseInt(c.textContent)+1;
+},8000);
+
+/* ═══ MAP DEMO ═══ */
+var INC_POOL = [
+  {type:'ROUBO',color:'#FF4757',emoji:'🚨',sevColor:'#FF4757',titles:['Tentativa de assalto','Furto de telemóvel','Roubo de carteira','Assalto a viatura','Furto em loja','Roubo com intimidação','Furto de bicicleta','Furto em residência','Assalto a peão','Roubo de mochila']},
+  {type:'ACIDENTE',color:'#FFD700',emoji:'💥',sevColor:'#FFD700',titles:['Colisão entre 2 viaturas','Atropelamento de peão','Despiste de motociclo','Acidente na rotunda','Colisão em cadeia','Capotamento na VCI','Acidente com feridos ligeiros','Embate contra poste','Acidente com ciclista','Colisão frontal']},
+  {type:'SUSPEITO',color:'#BC8CFF',emoji:'👁',sevColor:'#FFA500',titles:['Indivíduo com comportamento errático','Veículo suspeito estacionado','Grupo suspeito a vigiar loja','Pessoa a tentar abrir portas','Drone não autorizado','Pessoa a fotografar propriedade','Movimentação suspeita noturna','Tentativa de intrusão','Pessoa a seguir menores','Barulho suspeito em edifício abandonado']},
+  {type:'INCÊNDIO',color:'#FFA500',emoji:'🔥',sevColor:'#FF4757',titles:['Foco de incêndio em terreno baldio','Incêndio em contentor de lixo','Fumo visível em prédio','Alarme de incêndio ativado','Fogo em vegetação','Incêndio em garagem','Curto-circuito com faíscas','Fogo em obra abandonada','Princípio de incêndio em restaurante','Fogueira ilegal']},
+  {type:'VANDALISMO',color:'#BC8CFF',emoji:'🏚️',sevColor:'#BC8CFF',titles:['Grafiti em propriedade privada','Vidro de viatura partido','Banco de jardim destruído','Sinalização arrancada','Parquímetro danificado','Muro pichado','Iluminação pública destruída','Espelho retrovisor partido','Caixote do lixo incendiado','Cabine telefónica vandalizada']},
+  {type:'RUÍDO',color:'#8B949E',emoji:'📢',sevColor:'#8B949E',titles:['Festa com música alta','Obras fora de horário permitido','Alarme de carro a tocar','Discussão violenta na rua','Buzinas persistentes','Karaoke a volume alto','Motor de carro a acelerar','Petardos na via pública','Grupo ruidoso na madrugada','Escândalo em café']},
+  {type:'TRÂNSITO',color:'#00AAFF',emoji:'🚦',sevColor:'#FFD700',titles:['Congestionamento na VCI','Semáforo avariado','Via cortada por acidente','Obra na estrada sem sinalização','Estacionamento em segunda fila','Veículo avariado a bloquear faixa','Trânsito parado na A28','Desvio de trânsito inesperado','Buraco perigoso na estrada','Inundação na via']},
+  {type:'MÉDICO',color:'#FF6B6B',emoji:'🏥',sevColor:'#FF4757',titles:['Pessoa inconsciente no passeio','Queda de idoso na rua','Pessoa com dificuldade respiratória','Acidente com ferido grave','Criança com febre alta','Reação alérgica grave','Pessoa desmaiada no metro','Ferimento com sangramento','Ataque cardíaco reportado','Intoxicação alimentar em grupo']},
+];
+var STREETS = ['Rua de Santa Catarina','Av. dos Aliados','Rua das Flores','Praça da Liberdade','Rua de Cedofeita','Av. da Boavista','Rua do Almada','Rotunda da Boavista','Rua Sá da Bandeira','Cais da Ribeira','Rua de Passos Manuel','Largo dos Lóios','Rua do Heroísmo','Rua de Camões','Rua da Constituição','Praça de Carlos Alberto','Rua do Rosário','Rua de S. João','Travessa de Cedofeita','Rua do Bonfim','Rua Miguel Bombarda','Rua de Costa Cabral','Rua de Fernandes Tomás','Av. de França','Rua do Campo Alegre','Estrada da Circunvalação','VCI — Nó de Francos','A28 — Km 14','IC1 — Saída Maia','Túnel de Ceuta'];
+var CENTER_LAT = 41.155, CENTER_LNG = -8.625, SPREAD = 0.035;
+
+function randInc() {
+  var pool = INC_POOL[Math.floor(Math.random()*INC_POOL.length)];
+  var title = pool.titles[Math.floor(Math.random()*pool.titles.length)];
+  var street = STREETS[Math.floor(Math.random()*STREETS.length)];
+  var mins = Math.floor(Math.random()*120)+1;
+  var timeStr = mins < 60 ? mins+'m' : Math.floor(mins/60)+'h';
+  return {
+    lat: CENTER_LAT + (Math.random()-0.5)*SPREAD*2,
+    lng: CENTER_LNG + (Math.random()-0.5)*SPREAD*2,
+    type: pool.type, color: pool.color, emoji: pool.emoji, sevColor: pool.sevColor,
+    title: title+' — '+street,
+    time: timeStr, verified: Math.random()>0.6
+  };
+}
+
+function generateInitialBatch(n) { var a=[]; for(var i=0;i<n;i++) a.push(randInc()); return a; }
+
+var demoMapRef = null;
+var demoMarkers = [];
+var MAX_MAP_MARKERS = 50;
+
+var mapInitObs = new IntersectionObserver(function(entries){
+  if(entries[0].isIntersecting){ initDemoMap(); mapInitObs.disconnect(); }
+},{threshold:0.1});
+mapInitObs.observe(document.getElementById('mapContainer'));
+
+function addIncidentToMap(map, inc, sidebar, animate) {
+  var sevC = inc.sevColor || inc.color;
+  var el = document.createElement('div');
+  el.className = 'map-marker';
+  if(animate) { el.style.opacity='0'; el.style.transition='opacity .5s ease'; }
+  el.innerHTML =
+    '<div class="mk-icon" style="background:'+inc.color+'15;border:2px solid '+inc.color+'90;box-shadow:0 0 12px '+inc.color+'50,0 2px 8px rgba(0,0,0,0.4)">'+
+      '<div class="mk-pulse" style="background:'+inc.color+'25;border:1px solid '+inc.color+'35"></div>'+
+      '<span>'+inc.emoji+'</span>'+
+      '<div class="mk-sev" style="background:'+sevC+';box-shadow:0 0 5px '+sevC+'"></div>'+
+      (inc.verified?'<div class="mk-verified">✓</div>':'')+
+    '</div>'+
+    '<div class="mk-label" style="color:'+inc.color+'">'+inc.type+'</div>';
+
+  var marker = new maplibregl.Marker({element:el,anchor:'center'})
+    .setLngLat([inc.lng,inc.lat])
+    .addTo(map);
+
+  if(animate) requestAnimationFrame(function(){requestAnimationFrame(function(){el.style.opacity='1';});});
+
+  var hoverPop = null;
+  el.addEventListener('mouseenter', function(){
+    if(hoverPop) return;
+    hoverPop = new maplibregl.Popup({offset:18,closeButton:false,closeOnClick:false,maxWidth:'240px'})
+      .setLngLat([inc.lng,inc.lat])
+      .setHTML(
+        '<div style="padding:10px 12px;font-family:Courier New,monospace;background:rgba(14,14,28,0.96);border-radius:10px;border:1px solid '+inc.color+'30">'+
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'+
+        '<span style="font-size:14px">'+inc.emoji+'</span>'+
+        '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:8px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;background:'+inc.color+'18;color:'+inc.color+';border:1px solid '+inc.color+'30">'+inc.type+'</span>'+
+        '<span style="font-size:9px;color:#666;margin-left:auto">'+inc.time+' atrás</span>'+
+        '</div>'+
+        '<div style="font-size:11px;font-weight:600;color:#E6EDF3;line-height:1.3;margin-bottom:4px">'+inc.title+'</div>'+
+        (inc.verified?'<span style="font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;background:rgba(0,255,136,0.1);color:#00FF88;border:0.5px solid rgba(0,255,136,0.25)">VERIFICADO</span>':'')+
+        '</div>'
+      )
+      .addTo(map);
+  });
+  el.addEventListener('mouseleave', function(){
+    if(hoverPop){hoverPop.remove();hoverPop=null;}
+  });
+
+  el.addEventListener('click', function(){
+    if(hoverPop){hoverPop.remove();hoverPop=null;}
+    map.flyTo({center:[inc.lng,inc.lat],zoom:15,duration:800});
+    new maplibregl.Popup({offset:20,maxWidth:'260px',closeOnClick:true})
+      .setHTML(
+        '<div style="padding:14px;font-family:Courier New,monospace;background:#141420;border-radius:8px">'+
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'+
+        '<span style="width:7px;height:7px;border-radius:50%;background:'+inc.color+'"></span>'+
+        '<span style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:'+inc.color+'">'+inc.type+'</span>'+
+        '<span style="font-size:9px;color:#8B949E;margin-left:auto">'+inc.time+' atrás</span>'+
+        '</div>'+
+        '<div style="font-size:12px;font-weight:600;color:#E6EDF3;margin-bottom:6px">'+inc.title+'</div>'+
+        (inc.verified?'<span style="font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;background:rgba(0,255,136,0.1);color:#00FF88;border:0.5px solid rgba(0,255,136,0.25)">VERIFICADO</span>':'')+
+        '</div>'
+      )
+      .setLngLat([inc.lng,inc.lat])
+      .addTo(map);
+  });
+
+  var card = document.createElement('div');
+  card.className = 'map-inc-card';
+  if(animate) card.classList.add('new-incident');
+  card.innerHTML =
+    '<div class="top"><span class="dot" style="background:'+inc.color+'"></span><span class="type" style="color:'+inc.color+'">'+inc.type+'</span><span class="time">'+inc.time+'</span></div>'+
+    '<div class="title">'+inc.title+'</div>'+
+    '<div class="meta">'+(inc.verified?'✓ Verificado':'Pendente')+' · '+inc.lat.toFixed(4)+', '+inc.lng.toFixed(4)+'</div>';
+  card.addEventListener('click', function(){
+    map.flyTo({center:[inc.lng,inc.lat],zoom:15.5,duration:800});
+  });
+  if(animate && sidebar.firstChild) sidebar.insertBefore(card, sidebar.firstChild);
+  else sidebar.appendChild(card);
+
+  demoMarkers.push({marker:marker, card:card});
+
+  if(demoMarkers.length > MAX_MAP_MARKERS) {
+    var old = demoMarkers.shift();
+    old.marker.remove();
+    if(old.card.parentNode) old.card.parentNode.removeChild(old.card);
+  }
+}
+
+function initDemoMap(){
+  if(typeof maplibregl==='undefined'){setTimeout(initDemoMap,500);return;}
+  var map = new maplibregl.Map({
+    container:'mapContainer',
+    style:'https://tiles.openfreemap.org/styles/dark',
+    center:[CENTER_LNG,CENTER_LAT],
+    zoom:13.5,
+    pitch:45,
+    bearing:-10,
+    maxPitch:70,
+    attributionControl:false,
+    interactive:true
+  });
+  demoMapRef = map;
+
+  map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
+
+  map.on('load', function(){
+    var sidebar = document.getElementById('mapSidebar');
+    sidebar.innerHTML = '';
+
+    var initial = generateInitialBatch(30);
+    initial.forEach(function(inc){ addIncidentToMap(map, inc, sidebar, false); });
+
+    setInterval(function(){
+      var inc = randInc();
+      addIncidentToMap(map, inc, sidebar, true);
+
+      var counter = document.getElementById('incidentCounter');
+      if(counter) counter.textContent = parseInt(counter.textContent||'0')+1;
+    }, 5000);
+
+    // ── Public Cameras ──
+    var DEMO_CAMERAS = [
+      {id:'cam1',name:'Ponte D. Luís I — Trânsito',lat:41.1403,lng:-8.6097,type:'traffic',url:'https://video.cml.pt/stream/ponte-luis-i',country:'Portugal'},
+      {id:'cam2',name:'Avenida dos Aliados — Centro',lat:41.1488,lng:-8.6115,type:'urban',url:'https://video.cml.pt/stream/aliados',country:'Portugal'},
+      {id:'cam3',name:'Praia de Matosinhos',lat:41.1750,lng:-8.6906,type:'coastal',url:'https://video.cml.pt/stream/matosinhos',country:'Portugal'},
+      {id:'cam4',name:'VCI — Nó de Francos',lat:41.1612,lng:-8.6389,type:'traffic',url:'https://video.cml.pt/stream/vci-francos',country:'Portugal'},
+      {id:'cam5',name:'Parque da Cidade',lat:41.1680,lng:-8.6780,type:'nature',url:'https://video.cml.pt/stream/parque-cidade',country:'Portugal'},
+      {id:'cam6',name:'Estádio do Dragão — Acesso',lat:41.1617,lng:-8.5837,type:'urban',url:'https://video.cml.pt/stream/dragao',country:'Portugal'},
+    ];
+    var CAM_COLORS = {traffic:'#FF9800',urban:'#00AAFF',coastal:'#00BCD4',nature:'#4CAF50',other:'#9E9E9E'};
+    var CAM_LABELS = {traffic:'Trânsito',urban:'Urbana',coastal:'Costeira',nature:'Natureza',other:'Outra'};
+
+    DEMO_CAMERAS.forEach(function(cam){
+      var cel = document.createElement('div');
+      cel.className = 'cam-mk';
+      cel.innerHTML = '📷';
+
+      var cmk = new maplibregl.Marker({element:cel,anchor:'center'}).setLngLat([cam.lng,cam.lat]).addTo(map);
+
+      var camHoverPop = null;
+      var cc = CAM_COLORS[cam.type]||'#9E9E9E';
+      var cl = CAM_LABELS[cam.type]||cam.type;
+
+      cel.addEventListener('mouseenter', function(){
+        if(camHoverPop) return;
+        camHoverPop = new maplibregl.Popup({offset:18,closeButton:false,closeOnClick:false,maxWidth:'240px'})
+          .setLngLat([cam.lng,cam.lat])
+          .setHTML(
+            '<div style="padding:10px 12px;font-family:Courier New,monospace;background:rgba(14,14,28,0.96);border-radius:10px;border:1px solid '+cc+'30">'+
+            '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'+
+            '<span style="font-size:14px">📷</span>'+
+            '<span style="font-size:11px;font-weight:700;color:#E6EDF3;flex:1">'+cam.name+'</span>'+
+            '</div>'+
+            '<div style="display:flex;align-items:center;gap:6px">'+
+            '<span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:'+cc+'18;color:'+cc+';border:1px solid '+cc+'35">'+cl+'</span>'+
+            '<span style="font-size:9px;color:#8B949E">'+cam.country+'</span>'+
+            '</div>'+
+            '<div style="margin-top:6px;font-size:8px;color:#00FF88;font-weight:600;letter-spacing:.5px">CLIQUE PARA VER AO VIVO ▶</div>'+
+            '</div>'
+          )
+          .addTo(map);
+      });
+      cel.addEventListener('mouseleave', function(){
+        if(camHoverPop){camHoverPop.remove();camHoverPop=null;}
+      });
+
+      cel.addEventListener('click', function(){
+        if(camHoverPop){camHoverPop.remove();camHoverPop=null;}
+        map.flyTo({center:[cam.lng,cam.lat],zoom:15,duration:800});
+        new maplibregl.Popup({offset:20,maxWidth:'280px',closeOnClick:true})
+          .setHTML(
+            '<div style="padding:14px;font-family:Courier New,monospace;background:#141420;border-radius:8px">'+
+            '<div style="font-size:13px;font-weight:700;color:#E6EDF3;margin-bottom:6px">📷 '+cam.name+'</div>'+
+            '<div style="margin-bottom:8px"><span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:'+cc+'22;color:'+cc+';border:1px solid '+cc+'44">'+cl+'</span>'+
+            ' <span style="font-size:10px;color:#8B949E">'+cam.country+'</span></div>'+
+            '<div style="width:100%;height:140px;background:#000;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:8px">'+
+            '<span style="color:#555;font-size:11px">▶ Stream ao vivo — clique para abrir</span></div>'+
+            '<a href="'+cam.url+'" target="_blank" rel="noopener" style="display:block;width:100%;padding:8px;border:none;border-radius:8px;background:rgba(0,170,255,0.2);color:#00AAFF;font-size:11px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:background .2s ease">↗ Abrir Câmera</a>'+
+            '</div>'
+          )
+          .setLngLat([cam.lng,cam.lat])
+          .addTo(map);
+      });
+
+      var ccard = document.createElement('div');
+      ccard.className = 'map-inc-card';
+      ccard.innerHTML =
+        '<div class="top"><span class="dot" style="background:#00AAFF"></span><span class="type" style="color:#00AAFF">📷 CÂMERA</span></div>'+
+        '<div class="title">'+cam.name+'</div>'+
+        '<div class="meta">'+cl+' · '+cam.country+'</div>';
+      ccard.addEventListener('click',function(){map.flyTo({center:[cam.lng,cam.lat],zoom:15.5,duration:800});});
+      sidebar.appendChild(ccard);
+    });
+
+    // user location
+    var userEl = document.createElement('div');
+    userEl.innerHTML = '<div style="width:16px;height:16px;border-radius:50%;background:#00FF88;border:3px solid #0D1117;box-shadow:0 0 12px rgba(0,255,136,0.5);position:relative"><div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid rgba(0,255,136,0.3);animation:m-pulse 2.5s ease-out infinite"></div></div>';
+    new maplibregl.Marker({element:userEl,anchor:'center'}).setLngLat([-8.620,41.1556]).addTo(map);
+  });
+}
+
+/* ═══ LANGUAGE SWITCHER ═══ */
+var LANG_DATA = {
+  pt: {
+    'hero.badge': ' incidentes ativos agora',
+    'hero.h1a': 'Incidentes não', 'hero.h1b': 'Você também não.',
+    'hero.sub': 'Monitorize, detete e responda a incidentes de segurança em tempo real. Uma plataforma. Zero pontos cegos.',
+    'hero.cta1': '[ COMEÇAR GRÁTIS ]', 'hero.cta2': 'Ver mapa ao vivo →',
+    'auth.title': 'Aceder ao', 'auth.subtitle': 'MONITORIZAÇÃO EM TEMPO REAL',
+    'auth.login': 'ENTRAR', 'auth.register': 'CRIAR CONTA',
+    'nav.product': 'Produto', 'nav.demo': 'Demo', 'nav.pricing': 'Preços', 'nav.feed': 'Feed', 'nav.enter': '[ ENTRAR ]',
+    'pricing.free': 'GRATUITO', 'pricing.premium': 'PREMIUM', 'pricing.free.price': '0', 'pricing.premium.price': '4',
+    'cta.title': 'Pronto para', 'cta.accent': 'reagir mais rápido?', 'cta.sub': 'Comece grátis. Atualize para Premium por apenas 4,99€/mês.',
+    'footer.copy': '© 2026 Alert.io — From alert to action.',
+  },
+  en: {
+    'hero.badge': ' active incidents now',
+    'hero.h1a': 'Incidents don\'t', 'hero.h1b': 'Neither should you.',
+    'hero.sub': 'Monitor, detect, and respond to security incidents in real time. One platform. Zero blind spots.',
+    'hero.cta1': '[ GET STARTED FREE ]', 'hero.cta2': 'See live map →',
+    'auth.title': 'Access', 'auth.subtitle': 'REAL-TIME MONITORING',
+    'auth.login': 'LOGIN', 'auth.register': 'CREATE ACCOUNT',
+    'nav.product': 'Product', 'nav.demo': 'Demo', 'nav.pricing': 'Pricing', 'nav.feed': 'Feed', 'nav.enter': '[ LOGIN ]',
+    'pricing.free': 'FREE', 'pricing.premium': 'PREMIUM', 'pricing.free.price': '0', 'pricing.premium.price': '4',
+    'cta.title': 'Ready to', 'cta.accent': 'react faster?', 'cta.sub': 'Start free. Upgrade to Premium for just €4.99/month.',
+    'footer.copy': '© 2026 Alert.io — From alert to action.',
+  },
+  es: {
+    'hero.badge': ' incidentes activos ahora',
+    'hero.h1a': 'Los incidentes no', 'hero.h1b': 'Tú tampoco.',
+    'hero.sub': 'Monitorea, detecta y responde a incidentes de seguridad en tiempo real. Una plataforma. Cero puntos ciegos.',
+    'hero.cta1': '[ EMPEZAR GRATIS ]', 'hero.cta2': 'Ver mapa en vivo →',
+    'auth.title': 'Acceder a', 'auth.subtitle': 'MONITOREO EN TIEMPO REAL',
+    'auth.login': 'ENTRAR', 'auth.register': 'CREAR CUENTA',
+    'nav.product': 'Producto', 'nav.demo': 'Demo', 'nav.pricing': 'Precios', 'nav.feed': 'Feed', 'nav.enter': '[ ENTRAR ]',
+    'pricing.free': 'GRATUITO', 'pricing.premium': 'PREMIUM', 'pricing.free.price': '0', 'pricing.premium.price': '4',
+    'cta.title': '¿Listo para', 'cta.accent': 'reaccionar más rápido?', 'cta.sub': 'Empieza gratis. Actualiza a Premium por solo 4,99€/mes.',
+    'footer.copy': '© 2026 Alert.io — De la alerta a la acción.',
+  }
+};
+function setLang(lang) {
+  var d = LANG_DATA[lang]; if(!d) return;
+  document.querySelectorAll('.lang-chip').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  var navLinks = document.querySelectorAll('[data-nav]');
+  var navKeys = ['nav.product','nav.demo','nav.pricing','nav.feed'];
+  navLinks.forEach(function(a, i){ if(d[navKeys[i]]) a.textContent = d[navKeys[i]]; });
+  var navBtn = document.querySelector('.nav-links .btn-primary');
+  if(navBtn && d['nav.enter']) navBtn.textContent = d['nav.enter'];
+  var heroSub = document.querySelector('.hero p.sub');
+  if(heroSub && d['hero.sub']) heroSub.textContent = d['hero.sub'];
+  var heroCta1 = document.querySelector('.hero-actions .btn-primary');
+  if(heroCta1 && d['hero.cta1']) heroCta1.textContent = d['hero.cta1'];
+  var heroCta2 = document.querySelector('.hero-actions .btn-ghost');
+  if(heroCta2 && d['hero.cta2']) heroCta2.textContent = d['hero.cta2'];
+  var authTitle = document.querySelector('.auth-card .auth-header h2');
+  if(authTitle && d['auth.title']) authTitle.innerHTML = d['auth.title']+' <span style="color:var(--green)">Alert.io</span>';
+  var authSub = document.querySelector('.auth-card .auth-header p');
+  if(authSub && d['auth.subtitle']) authSub.textContent = d['auth.subtitle'];
+  var tabLogin = document.getElementById('tab-login');
+  if(tabLogin && d['auth.login']) tabLogin.textContent = d['auth.login'];
+  var tabReg = document.getElementById('tab-register');
+  if(tabReg && d['auth.register']) tabReg.textContent = d['auth.register'];
+  var footerCopy = document.querySelector('.footer-copy');
+  if(footerCopy && d['footer.copy']) footerCopy.textContent = d['footer.copy'];
+  showToast(lang==='pt'?'Idioma: Português':lang==='en'?'Language: English':'Idioma: Español');
+}
+
+/* ═══ GLOBAL CURSOR GLOW — smooth with rAF ═══ */
+var _cursorX = 0, _cursorY = 0, _glowX = 0, _glowY = 0;
+document.addEventListener('mousemove', function(e) { _cursorX = e.clientX; _cursorY = e.clientY; });
+(function glowLoop() {
+  _glowX += (_cursorX - _glowX) * 0.15;
+  _glowY += (_cursorY - _glowY) * 0.15;
+  document.body.style.setProperty('--mx', _glowX + 'px');
+  document.body.style.setProperty('--my', _glowY + 'px');
+  requestAnimationFrame(glowLoop);
+})();
+
+/* ═══ HERO MOUSE GLOW ═══ */
+var heroEl = document.getElementById('hero');
+heroEl.addEventListener('mousemove', function(e) {
+  var r = heroEl.getBoundingClientRect();
+  heroEl.style.setProperty('--hx', (e.clientX - r.left) + 'px');
+  heroEl.style.setProperty('--hy', (e.clientY - r.top) + 'px');
+});
+
+/* ═══ SCROLL CHEVRON ═══ */
+var chevron = document.getElementById('scrollChevron');
+window.addEventListener('scroll', function() {
+  if (chevron) chevron.classList.toggle('hide', window.scrollY > 120);
+}, {passive:true});
+
+/* ═══ MAGNETIC BUTTONS ═══ */
+document.querySelectorAll('.btn-primary,.btn-livedemo,.plan-btn.primary').forEach(function(btn) {
+  btn.addEventListener('mousemove', function(e) {
+    var r = btn.getBoundingClientRect();
+    var cx = r.left + r.width/2, cy = r.top + r.height/2;
+    var dx = (e.clientX - cx) / (r.width/2);
+    var dy = (e.clientY - cy) / (r.height/2);
+    btn.style.transform = 'perspective(400px) rotateY('+dx*5+'deg) rotateX('+(-dy*5)+'deg) translateY(-2px) scale(1.02)';
+  });
+  btn.addEventListener('mouseleave', function() {
+    btn.style.transform = '';
+  });
+});
+
+/* ═══ 3D TILT — FEATURE CARDS ═══ */
+document.querySelectorAll('.feature-card').forEach(function(card) {
+  card.addEventListener('mousemove', function(e) {
+    var r = card.getBoundingClientRect();
+    var cx = r.left + r.width/2, cy = r.top + r.height/2;
+    var dx = (e.clientX - cx) / (r.width/2);
+    var dy = (e.clientY - cy) / (r.height/2);
+    card.style.transform = 'perspective(600px) rotateY('+dx*6+'deg) rotateX('+(-dy*6)+'deg) translateY(-4px) scale(1.01)';
+  });
+  card.addEventListener('mouseleave', function() {
+    card.style.transform = '';
+  });
+});
+
+
+</script>
+</body>
+</html>

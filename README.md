@@ -1,171 +1,232 @@
-# Alert.io — Community Safety Platform (Web + Mobile)
+# Alert.io — Community Safety Platform
 
-> Real-time incident reporting, family safety, and community vigilance. Built with **React Native + Expo SDK 52**, deployed on **Web**, **iOS**, and **Android**.
+> Real-time incident reporting, family safety, and community vigilance. A full-stack monorepo with **Web App**, **Flutter Mobile App**, **REST API**, **Landing Page**, and **Dev Tooling**.
 
 [![Tests](https://img.shields.io/badge/tests-55%20passed-brightgreen)](#testing)
 [![Platform](https://img.shields.io/badge/platform-web%20%7C%20iOS%20%7C%20android-blue)](#platforms)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
 
-## Platforms
+## Repository Structure
 
-| Platform | Map Engine | Run Command |
-|----------|-----------|-------------|
-| **Web** (Desktop / Mobile) | MapLibre GL JS + OpenFreeMap | `npx expo start --web` |
-| **Android** | MapLibre GL JS (web view) | `npx expo start --android` |
-| **iOS** | MapLibre GL JS (web view) | `npx expo start --ios` |
+```
+attention-app/                    # Monorepo root
+├── app/                          # Expo Router screens (web + mobile)
+├── src/                          # Shared source (components, services, stores, theme)
+├── __tests__/                    # Jest test suite (55 tests)
+├── alert-backend/                # Express + TypeScript REST API
+│   ├── src/                      # API routes, middleware, database
+│   ├── migrations/               # PostgreSQL schema
+│   └── Dockerfile                # Multi-stage production build
+├── alert-flutter/                # Flutter mobile app (Android/iOS/Web)
+│   ├── lib/                      # Dart source (screens, providers, services)
+│   ├── android/                  # Android platform config
+│   ├── ios/                      # iOS platform config
+│   └── web/                      # Flutter web config
+├── alert-io/                     # Static landing page (HTML + CSS + JS)
+├── tile-proxy/                   # Map tile proxy for dev environments
+├── docker-compose.yml            # PostgreSQL + API orchestration
+├── .env.example                  # All environment variables documented
+└── docs/                         # Architecture, database, reputation docs
+```
 
 ## Quick Start
 
-### Prerequisites
-
-- **Node.js 20+** — [nodejs.org](https://nodejs.org)
-- **Expo Go** — Install on mobile via App Store / Google Play
-
-### Installation
+### 1. Clone & Install
 
 ```bash
+git clone https://github.com/sae3ovr/attention-app.git
 cd attention-app
 npm install
 ```
 
-### Environment Setup
+### 2. Environment Setup
 
 ```bash
 cp .env.example .env
-# Edit .env with your Firebase credentials (optional — app works in demo mode without Firebase)
+# Edit .env — Firebase keys are optional (app works in demo mode)
+# Docker vars (POSTGRES_PASSWORD, JWT_SECRET) are required for backend
 ```
 
-### Run
+### 3. Start the Backend (Docker)
 
 ```bash
-# Web — opens at http://localhost:8081
-npx expo start --web --port 8081
+docker-compose up -d
+```
 
-# Mobile (LAN mode — scan QR with Expo Go)
+This starts:
+- **PostgreSQL 16** on `localhost:5432` (localhost only)
+- **REST API** on `localhost:3000`
+
+### 4. Run the Web App
+
+```bash
+npx expo start --web --port 8081
+```
+
+### 5. Run on Mobile
+
+```bash
+# Android / iOS via Expo Go
 npx expo start --lan --port 8081
 
-# Run tests
-npm test
-
-# Lint
-npx expo lint
-
-# Build for web (Vercel deployment)
-npx expo export --platform web
+# Flutter mobile app (separate)
+cd alert-flutter
+flutter pub get
+flutter run
 ```
 
-### Environment Variables
+### 6. Serve the Landing Page
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `EXPO_PUBLIC_FIREBASE_API_KEY` | No | Firebase API key (demo mode if unset) |
-| `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN` | No | Firebase auth domain |
-| `EXPO_PUBLIC_FIREBASE_PROJECT_ID` | No | Firebase project ID |
-| `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET` | No | Firebase storage bucket |
-| `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | No | Firebase messaging sender ID |
-| `EXPO_PUBLIC_FIREBASE_APP_ID` | No | Firebase app ID |
-| `EXPO_PUBLIC_ENABLE_AUTO_DEMO` | No | Set to `true` to enable auto-demo login on web |
-
-## Architecture
-
+```bash
+npx serve -s -l 8080 alert-io
 ```
-attention-app/
-├── app/                              # Expo Router screens
-│   ├── +html.tsx                     # Web HTML shell
-│   ├── _layout.tsx                   # Root layout + ErrorBoundary + AuthGate
-│   ├── (auth)/                       # Sign-in, Sign-up with verification
-│   ├── (tabs)/                       # Main tabs
-│   │   ├── index.tsx                 # Map screen (responsive sidebar)
-│   │   ├── chain.tsx                 # Chain member management + chat
-│   │   ├── family.tsx                # Family groups & Kid Mode
-│   │   └── profile.tsx               # Profile, badges, SOS, emergency services
-│   ├── incident/report.tsx           # 3-step incident report wizard
-│   └── settings/                     # Settings + accessibility
-├── src/
-│   ├── components/
-│   │   ├── map/                      # AttentionMap (native + web implementations)
-│   │   ├── camera/                   # CameraViewer (live streams)
-│   │   ├── ui/                       # GlassCard, NeonText, NeonButton, LogoMark, etc.
-│   │   └── incident/                 # IncidentCard
-│   ├── services/
-│   │   ├── authService.ts            # Firebase auth + demo mode
-│   │   ├── publicDataService.ts      # Public safety APIs
-│   │   ├── cameraService.ts          # Camera aggregation (22+ verified)
-│   │   ├── credibilityEngine.ts      # AI credibility scoring
-│   │   ├── database.ts               # In-memory database layer
-│   │   └── mockData.ts               # Demo data & utilities
-│   ├── stores/                       # Zustand state (auth, incidents, family, chain)
-│   ├── hooks/                        # useAccessibility, useHaptics, useResponsive
-│   ├── constants/                    # 32 Security Badges, 10+ Categories
-│   ├── sdk/                          # Attention SDK (embeddable safety layer)
-│   ├── i18n/                         # Multilingual (pt-BR, en, es, de)
-│   ├── theme/                        # Colors, typography, spacing tokens
-│   └── types/                        # TypeScript interfaces
-├── __tests__/                        # Jest test suite (55 tests)
-├── docs/                             # Architecture, database, reputation docs
-└── scripts/                          # Build, icon generation, test scripts
-```
+
+## All Platforms
+
+| Component | Technology | Run Command | Port |
+|-----------|-----------|-------------|------|
+| **Web App** | Expo + React Native Web | `npx expo start --web` | 8081 |
+| **Mobile App** | Expo + React Native | `npx expo start --lan` | 8081 |
+| **Flutter App** | Flutter 3.16+ | `cd alert-flutter && flutter run` | — |
+| **REST API** | Express + TypeScript | `docker-compose up -d` | 3000 |
+| **Landing Page** | Static HTML/JS | `npx serve -s -l 8080 alert-io` | 8080 |
+| **Tile Proxy** | Node.js | `node tile-proxy/server.js` | 8888 |
 
 ## Features
 
+### Web + Mobile App (Expo)
 - **Real-time incident mapping** with MapLibre GL JS + animated markers
 - **AI credibility engine** scoring reports by text quality, geography, history
-- **Public safety data** from UK Police, DC Open Data, Portugal dados.gov.pt
-- **22+ live cameras** (YouTube, MJPG streams) — no API keys needed
-- **Drive mode** with OSRM navigation + speed camera alerts
-- **GuardScan radar** — visual sweep finding incidents in configurable radius
+- **22+ live public cameras** (YouTube, MJPG streams) — no API keys needed
+- **Drive mode** with OSRM navigation + speed camera alerts via Overpass API
+- **GuardScan radar** — visual sweep discovering incidents in configurable radius
 - **Chain system** — link friends, pets, vehicles, devices with real-time location
 - **Family safety** — groups, Kid Mode, safe zones, SOS, battery monitoring
 - **32-level badge system** from Observador Iniciante to Guardião Supremo
-- **Accessibility** — VoiceOver/TalkBack labels, high contrast, reduced motion, 48px+ targets
-- **ErrorBoundary** — graceful crash recovery with user-friendly error screen
+- **ErrorBoundary** — graceful crash recovery
+- **Accessibility** — VoiceOver/TalkBack labels, high contrast, reduced motion
+
+### Flutter App
+- Native Android/iOS/Web with Riverpod state management
+- Encrypted token storage via `flutter_secure_storage`
+- Configurable API URL via `--dart-define`
+- 9 screens: map, feed, chain, family, profile, login, register, boot, home
+
+### Backend API
+- JWT auth with pinned HS256, 7-day expiry
+- Parameterized SQL (no injection)
+- bcrypt password hashing
+- CORS restricted to configured origins
+- Ownership verification on family/chain operations
+- Multi-stage Docker build (non-root, healthcheck)
+
+### Landing Page
+- Animated hero, live MapLibre demo, pricing, login/register
+- Open Graph + Twitter Card SEO
+- Configurable app URL via `window.ALERT_APP_URL`
+
+## Environment Variables
+
+```bash
+# === Firebase (optional — demo mode works without these) ===
+EXPO_PUBLIC_FIREBASE_API_KEY=
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+EXPO_PUBLIC_FIREBASE_APP_ID=
+
+# === App behavior ===
+EXPO_PUBLIC_ENABLE_AUTO_DEMO=false
+
+# === Docker / Backend (required for API) ===
+POSTGRES_DB=alertio
+POSTGRES_USER=alertio
+POSTGRES_PASSWORD=<strong-random-password>
+JWT_SECRET=<64-char-random-string>
+NODE_ENV=development
+CORS_ORIGINS=http://localhost:8081,http://localhost:8080
+```
 
 ## Testing
 
 ```bash
-npm test              # Run all 55 tests
-npm run test:loop     # Run user-loop integration test
-npx expo lint         # ESLint checks
-```
+# Expo app tests (55 tests)
+npm test
 
-## Deployment
+# Backend type check
+cd alert-backend && npx tsc --noEmit
 
-### Vercel (Web)
+# Flutter analysis
+cd alert-flutter && flutter analyze
 
-The app deploys to Vercel with security headers (CSP, HSTS, X-Frame-Options):
+# Expo lint
+npx expo lint
 
-```bash
+# Web build
 npx expo export --platform web
-# Output in dist/ — deploy via Vercel CLI or git push
 ```
 
-### EAS Build (Mobile)
+## Architecture
 
-```bash
-npx eas build --platform android --profile preview
-npx eas build --platform android --profile production
+```
+┌─────────────┐     ┌──────────────┐     ┌───────────────┐
+│  Landing     │     │  Web/Mobile  │     │  Flutter App  │
+│  (alert-io)  │────▶│  (Expo)      │     │  (alert-      │
+│  Port 8080   │     │  Port 8081   │     │   flutter)    │
+└─────────────┘     └──────┬───────┘     └───────┬───────┘
+                           │                     │
+                           ▼                     ▼
+                    ┌──────────────┐     ┌──────────────┐
+                    │  REST API    │     │  Tile Proxy  │
+                    │  (alert-     │     │  (tile-proxy)│
+                    │   backend)   │     │  Port 8888   │
+                    │  Port 3000   │     └──────────────┘
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │  PostgreSQL  │
+                    │  Port 5432   │
+                    └──────────────┘
 ```
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Framework** | React Native + Expo (SDK 52) |
-| **Routing** | Expo Router |
-| **State** | Zustand |
-| **Map** | MapLibre GL JS + OpenFreeMap.org |
-| **Auth** | Firebase Authentication (configurable) |
-| **Build** | EAS Build (mobile), Metro + Vercel (web) |
+| **Web/Mobile Framework** | React Native + Expo (SDK 52) |
+| **Flutter Framework** | Flutter 3.16+ with Riverpod |
+| **Backend** | Express 4.21 + TypeScript |
+| **Database** | PostgreSQL 16 |
+| **Auth** | Firebase Authentication / JWT |
+| **Map** | MapLibre GL JS + OpenFreeMap |
+| **State** | Zustand (Expo) / Riverpod (Flutter) |
 | **Testing** | Jest + ts-jest |
-| **Languages** | Português (BR), English, Español, Deutsch |
+| **Deployment** | Vercel (web), EAS Build (mobile), Docker (API) |
 
 ## Security
 
-- **ErrorBoundary** wraps the entire app for crash recovery
-- **Auto-demo login** gated behind `EXPO_PUBLIC_ENABLE_AUTO_DEMO` env flag
-- **No client-side password storage** — verification flow is stateless
-- **CSP + HSTS** headers configured in `vercel.json`
-- **Firebase client keys** are public by design — security enforced via Firebase Rules
+- No hardcoded secrets — all env-driven with fail-fast in production
+- JWT with pinned HS256 algorithm, 7-day expiry
+- CORS restricted to configured origins
+- CSP + HSTS + Permissions-Policy headers (Vercel)
+- Multi-stage Docker build with non-root user
+- Encrypted token storage on mobile
+- No cleartext HTTP traffic in production
+
+## Detailed Documentation
+
+| Doc | Location |
+|-----|----------|
+| Backend API docs | [`alert-backend/README.md`](alert-backend/README.md) |
+| Flutter app docs | [`alert-flutter/README.md`](alert-flutter/README.md) |
+| Landing page docs | [`alert-io/README.md`](alert-io/README.md) |
+| Tile proxy docs | [`tile-proxy/README.md`](tile-proxy/README.md) |
+| Architecture | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Database schema | [`docs/DATABASE.md`](docs/DATABASE.md) |
+| Reputation system | [`docs/REPUTATION.md`](docs/REPUTATION.md) |
+| SDK documentation | [`docs/SDK.md`](docs/SDK.md) |
 
 ## License
 
